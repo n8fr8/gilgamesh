@@ -40,6 +40,9 @@
     <string name="discoverable">Make discoverable</string>
     <string name="connected_to_">"Connected to "</string>
     <string name="me_">"Me:  "</string>
-    <string name="broadcast_mode_public_">Broadcast Mode (Public)</string>
+    <string name="broadcast_mode_public_">Broadcast (Public)</string>
     <string name="_private_">(private)</string>
+    <string name="you_are_">"You are: "</string>
+    
+    <string name="share_app">Share App</string>
 </resources>

@@ -22,6 +22,10 @@
           android:icon="@android:drawable/ic_menu_search"
           android:title="@string/insecure_connect"
           android:showAsAction="never" />
+    
+    <item android:id="@+id/share_app"
+        android:title="@string/share_app"
+        android:showAsAction="never"/>
     <!-- 
     <item android:id="@+id/discoverable"
           android:icon="@android:drawable/ic_menu_mylocation"

@@ -16,8 +16,7 @@
 
 package info.guardianproject.gilga;
 
-import info.guardianproject.gilga.R;
-
+import java.io.File;
 import java.util.Date;
 import java.util.Hashtable;
 
@@ -29,7 +28,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -304,7 +306,7 @@ public class GilgaMesh extends Activity {
                     break;
                 case BluetoothChatService.STATE_LISTEN:
                 case BluetoothChatService.STATE_NONE:
-                    setStatus(R.string.broadcast_mode_public_);
+                    setStatus(getString(R.string.broadcast_mode_public_) + " | " + getString(R.string.you_are_) + mapToNickname(mBluetoothAdapter.getAddress()));
                     mConversationArrayAdapter.clear();
                     break;
                 }
@@ -347,13 +349,13 @@ public class GilgaMesh extends Activity {
         case REQUEST_CONNECT_DEVICE_SECURE:
             // When DeviceListActivity returns with a device to connect
             if (resultCode == Activity.RESULT_OK) {
-                connectDevice(data, true);
+                connectDevice(data);
             }
             break;
         case REQUEST_CONNECT_DEVICE_INSECURE:
             // When DeviceListActivity returns with a device to connect
             if (resultCode == Activity.RESULT_OK) {
-                connectDevice(data, false);
+                connectDevice(data);
             }
             break;
         case REQUEST_ENABLE_BT:
@@ -370,14 +372,17 @@ public class GilgaMesh extends Activity {
         }
     }
 
-    private void connectDevice(Intent data, boolean secure) {
+    private void connectDevice(Intent data) {
         // Get the device MAC address
         String address = data.getExtras()
             .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
         // Get the BluetoothDevice object
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-        // Attempt to connect to the device
-        mChatService.connect(device, secure);
+        
+        //start direct chat, if paied, then enable a secure connection
+        mChatService.connect(device, device.getBondState() == BluetoothDevice.BOND_BONDED);
+        
+        // Attempt to connect to the device);
     }
     
     @Override
@@ -414,6 +419,9 @@ public class GilgaMesh extends Activity {
             serverIntent = new Intent(this, DeviceListActivity.class);
             startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_INSECURE);
             return true;
+        case R.id.share_app:
+        	shareAPKFile();
+        	break;
         //case R.id.discoverable:
             // Ensure this device is discoverable by others
           //  ensureDiscoverable();
@@ -485,4 +493,26 @@ public class GilgaMesh extends Activity {
     	    return null;
     	}
 
+    private void shareAPKFile ()
+    {
+    	PackageManager pm = getPackageManager();
+
+    //	String thisPkgId = pm.getPackageInfo(getPackageName(), 0).packageName;
+    			
+        String uri = null;
+        for (ApplicationInfo app : pm.getInstalledApplications(0)) {
+            if(!((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 1))
+                if(!((app.flags & ApplicationInfo.FLAG_SYSTEM) == 1)){
+                    uri=app.sourceDir;
+                      if(uri.contains(getPackageName()))
+                      break;
+                }
+        }
+
+        Intent intent = new Intent();  
+        intent.setAction(Intent.ACTION_SEND);  
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(uri)));
+        startActivity(intent);
+    }
 }
