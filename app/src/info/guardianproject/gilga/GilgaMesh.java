@@ -19,6 +19,7 @@ package info.guardianproject.gilga;
 import java.io.File;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -129,7 +130,6 @@ public class GilgaMesh extends Activity {
         } else {
             if (mChatService == null) setupChat();
 
-            ensureDiscoverable();
         }
         
     }
@@ -182,6 +182,8 @@ public class GilgaMesh extends Activity {
 
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
+
+        ensureDiscoverable();
     }
 
     @Override
@@ -253,14 +255,23 @@ public class GilgaMesh extends Activity {
             	mChatService.write(send);
             else
             {
-            	mBluetoothAdapter.setName(' ' + message);
+            	
+            	mOutStringBuffer.append(' ' + message + '\n');
+
+            	if (mOutStringBuffer.toString().getBytes().length > 248)
+            	{
+            		  mOutStringBuffer.setLength(0);
+            		  mOutStringBuffer.append(' ' + message + '\n');
+            	}
+            	
+            	mBluetoothAdapter.setName(mOutStringBuffer.toString());
         		mConversationArrayAdapter.add(getString(R.string.me_)+ message);
             }
             
             		
             // Reset out string buffer to zero and clear the edit text field
-            mOutStringBuffer.setLength(0);
-            mOutEditText.setText(mOutStringBuffer);
+          
+            mOutEditText.setText("");
             
         }
     }
@@ -445,23 +456,31 @@ public class GilgaMesh extends Activity {
                 
                 if (device.getName() != null)
                 {
-                	String message = device.getName();
+                	String messageBuffer = device.getName();
                 	String from = device.getAddress();
                 	
-                	if (message.startsWith("#")||message.startsWith("!")||message.startsWith("@")||message.startsWith(" "))
+                	StringTokenizer st = new StringTokenizer(messageBuffer,"\n");
+                	
+                	while (st.hasMoreTokens())
                 	{
-                		message = message.trim();
-	                	String hash = MD5(message+device.getAddress());
-	                			
-	                	if (!mMessageLog.containsKey(hash))
-	                	{	
-	                		from = mapToNickname (device.getAddress());
-	                		
-	                		if (device.getBondState() == BluetoothDevice.BOND_BONDED)
-	                			from += '*';
-	                		
-	                		mMessageLog.put(hash, new Date());
-	                		mConversationArrayAdapter.add(from + ": " + message);
+                	
+                		String message = st.nextToken();
+                		
+	                	if (message.startsWith("#")||message.startsWith("!")||message.startsWith("@")||message.startsWith(" "))
+	                	{
+	                		message = message.trim();
+		                	String hash = MD5(message+device.getAddress());
+		                			
+		                	if (!mMessageLog.containsKey(hash))
+		                	{	
+		                		from = mapToNickname (device.getAddress());
+		                		
+		                		if (device.getBondState() == BluetoothDevice.BOND_BONDED)
+		                			from += '*';
+		                		
+		                		mMessageLog.put(hash, new Date());
+		                		mConversationArrayAdapter.add(from + ": " + message);
+		                	}
 	                	}
                 	}
                 }
