@@ -13,6 +13,10 @@ The design goals of this project are:
 * A very transient app that stores no data permanently
 * Ability to share the app easily between devices
 * A "fire and forget" mode, where the user can enter a message, put the phone in their pocket, and walk around and area and have it broadcast to all devices it encounters
+* 
+
+![alt](https://github.com/n8fr8/gilgamesh/blob/master/screens/device-2014-10-01-152536.png)
+![alt](https://github.com/n8fr8/gilgamesh/blob/master/screens/device-2014-10-01-152947.png)
 
 The key innovations/hacks/revelations that led us to this point were:
 
