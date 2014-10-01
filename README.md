@@ -1,7 +1,7 @@
 gilgamesh
 =========
 
-Gilga Meshenger: King of Babylon!
+Gilga Meshenger: Messaging in the Bluetooth Babylon!
 
 Some notes on the implementation, aka the glorious hack of Bluetooth Device Names. This application was original based on the Android SDK BluetoothChat sample. It used insecure (unpaired) and secure (paired) Bluetooth RFComm sockets to allow for short messages to be sent between devices. The primary modification that this project has made has been to add support for a "Broadcast" mode, that uses the Bluetooth device name, that is public visible during the Discovery process, as the message transport itself. 
 
