@@ -121,17 +121,24 @@ public class GilgaMesh extends Activity {
 		super.onStart();
 		if(D) Log.e(TAG, "++ ON START ++");
 
-		// If BT is not on, request that it be enabled.
+		IntentFilter filter = new IntentFilter();
+		// Register for broadcasts when a device is discovered
+		filter.addAction(BluetoothDevice.ACTION_FOUND);
+		// Register for broadcasts when discovery has finished
+		filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+		this.registerReceiver(mReceiver, filter);
+
+		// If BT is not on and discoverable, request to make it so -
 		// setupChat() will then be called during onActivityResult
-		if (!mBluetoothAdapter.isEnabled()) {
-			Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+		if (!mBluetoothAdapter.isEnabled() || mBluetoothAdapter.getScanMode() !=
+				BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 3600);
+			startActivityForResult(discoverableIntent, REQUEST_ENABLE_BT);
 			// Otherwise, setup the chat session
 		} else {
 			if (mChatService == null) setupChat();
-
 		}
-
 	}
 
 	@Override
@@ -197,7 +204,9 @@ public class GilgaMesh extends Activity {
 		// Initialize the buffer for outgoing messages
 		mOutStringBuffer = new StringBuffer("");
 
-		ensureDiscoverable();
+		// Start discovering devices
+		if (!mBluetoothAdapter.isDiscovering())
+			mBluetoothAdapter.startDiscovery();
 	}
 
 	@Override
@@ -220,38 +229,11 @@ public class GilgaMesh extends Activity {
 		if(D) Log.e(TAG, "--- ON DESTROY ---");
 
 		// Make sure we're not doing discovery anymore
-		if (mBluetoothAdapter != null && mBluetoothAdapter.isDiscovering()) {
+		if (mBluetoothAdapter != null && mBluetoothAdapter.isDiscovering())
 			mBluetoothAdapter.cancelDiscovery();
 
-
-			// Unregister broadcast listeners
-			this.unregisterReceiver(mReceiver);
-		}
-
-	}
-
-	private void ensureDiscoverable() {
-		if(D) Log.d(TAG, "ensure discoverable");
-		if (mBluetoothAdapter.getScanMode() !=
-				BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-
-			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 3600);
-			startActivity(discoverableIntent);
-
-		}
-
-
-		// Register for broadcasts when a device is discovered
-		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-		this.registerReceiver(mReceiver, filter);
-
-		// Register for broadcasts when discovery has finished
-		filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-		this.registerReceiver(mReceiver, filter);
-
-		if (!mBluetoothAdapter.isDiscovering())
-			mBluetoothAdapter.startDiscovery();
+		// Unregister broadcast listeners
+		this.unregisterReceiver(mReceiver);
 	}
 
 	/**
@@ -385,15 +367,15 @@ public class GilgaMesh extends Activity {
 			}
 			break;
 		case REQUEST_ENABLE_BT:
-			// When the request to enable Bluetooth returns
-			if (resultCode == Activity.RESULT_OK) {
-				// Bluetooth is now enabled, so set up a chat session
-				setupChat();
-			} else {
-				// User did not enable Bluetooth or an error occurred
+			// When the request to allow discoverability returns
+			if (resultCode == Activity.RESULT_CANCELED) {
+				// User did not allow discoverability or an error occurred
 				Log.d(TAG, "BT not enabled");
 				Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
 				finish();
+			} else {
+				// Bluetooth is now enabled, so set up a chat session
+				setupChat();
 			}
 		}
 	}
