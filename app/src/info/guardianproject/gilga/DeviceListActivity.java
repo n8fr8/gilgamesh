@@ -16,8 +16,6 @@
 
 package info.guardianproject.gilga;
 
-import info.guardianproject.gilga.R;
-
 import java.util.Set;
 
 import android.app.Activity;
@@ -30,7 +28,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
