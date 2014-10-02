@@ -95,8 +95,6 @@ public class GilgaMesh extends Activity {
 
     private Hashtable<String,Date> mMessageLog = null;
     
-    private String mDeviceName = null;
-    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
