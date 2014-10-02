@@ -34,3 +34,4 @@ proguard/
 # Project files created by Eclipse
 app/.classpath
 app/.project
+app/.settings
