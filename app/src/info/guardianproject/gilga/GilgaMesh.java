@@ -487,8 +487,8 @@ public class GilgaMesh extends Activity {
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name
                 mConnectedDeviceName = mapToNickname(msg.getData().getString(DEVICE_NAME));
-                Toast.makeText(getApplicationContext(), R.string.connected_to_
-                               + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+               // Toast.makeText(getApplicationContext(), R.string.connected_to_
+                 //              + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
                 break;
             case MESSAGE_TOAST:
                 Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST),
