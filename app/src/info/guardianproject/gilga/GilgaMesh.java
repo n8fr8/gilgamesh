@@ -148,6 +148,36 @@ public class GilgaMesh extends Activity {
         	
         });
         
+        IntentFilter filter = new IntentFilter();
+        // Register for broadcasts when a device is discovered
+        filter.addAction(BluetoothDevice.ACTION_FOUND);
+        // Register for broadcasts when discovery has finished
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
+        //  Indicates a change in the Wi-Fi P2P status.
+        filter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+
+        // Indicates a change in the list of available peers.
+        filter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+
+        // Indicates the state of Wi-Fi P2P connectivity has changed.
+        filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+
+        // Indicates this device's details have changed.
+        filter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        
+        this.registerReceiver(mReceiver, filter);
+
+        // If BT is not on and discoverable, request to make it so -
+        // setupChat() will then be called during onActivityResult
+        if (!mBluetoothAdapter.isEnabled()) {
+        	Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        	 startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+            
+        } else {
+             setupChat();
+        }
+        
       //  createTabs();
         
     }
@@ -212,6 +242,8 @@ public class GilgaMesh extends Activity {
                  .setText("Direct Messages");
      
              actionBar.addTab(tab);
+             
+             
     }
 
     @Override
@@ -219,35 +251,7 @@ public class GilgaMesh extends Activity {
         super.onStart();
         if(D) Log.e(TAG, "++ ON START ++");
 
-        IntentFilter filter = new IntentFilter();
-        // Register for broadcasts when a device is discovered
-        filter.addAction(BluetoothDevice.ACTION_FOUND);
-        // Register for broadcasts when discovery has finished
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-
-        //  Indicates a change in the Wi-Fi P2P status.
-        filter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-
-        // Indicates a change in the list of available peers.
-        filter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-
-        // Indicates the state of Wi-Fi P2P connectivity has changed.
-        filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-
-        // Indicates this device's details have changed.
-        filter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-        
-        this.registerReceiver(mReceiver, filter);
-
-        // If BT is not on and discoverable, request to make it so -
-        // setupChat() will then be called during onActivityResult
-        if (!mBluetoothAdapter.isEnabled()) {
-        	Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        	 startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-            
-        } else {
-             setupChat();
-        }
+      
     }
 
     @Override
