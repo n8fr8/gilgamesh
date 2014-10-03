@@ -233,12 +233,10 @@ public class GilgaMesh extends Activity {
 
         // If BT is not on and discoverable, request to make it so -
         // setupChat() will then be called during onActivityResult
-        if (!mBluetoothAdapter.isEnabled() || mBluetoothAdapter.getScanMode() !=
-                BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 3600);
-            startActivityForResult(discoverableIntent, REQUEST_ENABLE_BT);
-            // Otherwise, setup the chat session
+        if (!mBluetoothAdapter.isEnabled()) {
+        	Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        	 startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+            
         } else {
             if (mChatService == null) setupChat();
         }
