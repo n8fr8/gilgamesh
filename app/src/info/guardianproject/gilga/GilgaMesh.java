@@ -17,6 +17,8 @@
 package info.guardianproject.gilga;
 
 import java.io.File;
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -34,6 +36,13 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.WifiP2pManager.ActionListener;
+import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
+import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -96,6 +105,10 @@ public class GilgaMesh extends Activity {
 
     private Hashtable<String,Date> mMessageLog = null;
     
+    //for WifiP2P mode
+    WifiP2pManager mWifiManager = null;
+    Channel mWifiChannel = null;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,10 +127,56 @@ public class GilgaMesh extends Activity {
             return;
         }
         
+        
+
+        mWifiManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        mWifiChannel = mWifiManager.initialize(this, getMainLooper(), new ChannelListener()
+        {
+
+			@Override
+			public void onChannelDisconnected() {
+				Log.d(TAG,"wifi p2p disconnected");
+			}
+        	
+        });
+        
       //  createTabs();
         
-        
     }
+    
+    private void setWifiDeviceName (String newDeviceName)
+    {
+    	try
+        {
+    		ActionListener al = new ActionListener ()
+    		{
+
+				@Override
+				public void onFailure(int arg0) {
+					Log.d(TAG,"could not set wifi device name: " + arg0);
+				}
+
+				@Override
+				public void onSuccess() {
+					
+					Log.d(TAG,"set new device name!");
+					
+				}
+    			
+    		};
+    		
+	        Class c;
+	        c = Class.forName("android.net.wifi.p2p.WifiP2pManager");
+	        Method m = c.getMethod("setDeviceName", new Class[] {Channel.class, String.class, ActionListener.class});
+	        Object o = m.invoke(mWifiManager, new Object[]{mWifiChannel,newDeviceName, al});
+	        
+        }
+        catch (Exception e){
+        	
+        	Log.e(TAG,"error setting wifi name",e);
+        }
+    }
+    
     
     private void createTabs ()
     {
@@ -157,6 +216,19 @@ public class GilgaMesh extends Activity {
         filter.addAction(BluetoothDevice.ACTION_FOUND);
         // Register for broadcasts when discovery has finished
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
+        //  Indicates a change in the Wi-Fi P2P status.
+        filter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+
+        // Indicates a change in the list of available peers.
+        filter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+
+        // Indicates the state of Wi-Fi P2P connectivity has changed.
+        filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+
+        // Indicates this device's details have changed.
+        filter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        
         this.registerReceiver(mReceiver, filter);
 
         // If BT is not on and discoverable, request to make it so -
@@ -260,6 +332,8 @@ public class GilgaMesh extends Activity {
         // Make sure we're not doing discovery anymore
         if (mBluetoothAdapter != null && mBluetoothAdapter.isDiscovering())
         	mBluetoothAdapter.cancelDiscovery();
+        
+        this.unregisterReceiver(mReceiver);
 
     }
 
@@ -279,17 +353,35 @@ public class GilgaMesh extends Activity {
     private void startListening ()
     {
         
-
-        // Register for broadcasts when a device is discovered
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        this.registerReceiver(mReceiver, filter);
-
-        // Register for broadcasts when discovery has finished
-        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        this.registerReceiver(mReceiver, filter);
-
         if (!mBluetoothAdapter.isDiscovering())
         	mBluetoothAdapter.startDiscovery();
+        
+        startWifiDiscovery ();
+       
+    }
+    
+    private void startWifiDiscovery ()
+    {
+    	 mWifiManager.discoverPeers(mWifiChannel, new WifiP2pManager.ActionListener() {
+
+             @Override
+             public void onSuccess() {
+                 // Code for when the discovery initiation is successful goes here.
+                 // No services have actually been discovered yet, so this method
+                 // can often be left blank.  Code for peer discovery goes in the
+                 // onReceive method, detailed below.
+             	Log.d(TAG,"success on wifi discover");
+             	//startWifiDiscovery();
+             }
+
+             @Override
+             public void onFailure(int reasonCode) {
+                 // Code for when the discovery initiation fails goes here.
+                 // Alert the user that something went wrong.
+             	Log.d(TAG,"FAIL on wifi discovery: " + reasonCode);
+             }
+
+    	    });
     }
 
     /**
@@ -317,6 +409,9 @@ public class GilgaMesh extends Activity {
             	}
             	
             	mBluetoothAdapter.setName(mOutStringBuffer.toString());
+            	
+            	setWifiDeviceName(' ' + message);
+            	
         		mConversationArrayAdapter.add(getString(R.string.me_)+ message);
         		
         		startBroadcasting() ;
@@ -403,7 +498,7 @@ public class GilgaMesh extends Activity {
     @Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		
-    	//super.onConfigurationChanged(newConfig);
+    	super.onConfigurationChanged(newConfig);
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -478,7 +573,8 @@ public class GilgaMesh extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent serverIntent = null;
         switch (item.getItemId()) {
-     //   case R.id.secure_connect_scan:
+     //   case R.id.secure_connect_scan:private final IntentFilter intentFilter = new IntentFilter();
+
             // Launch the DeviceListActivity to see devices and do scan
        //     serverIntent = new Intent(this, DeviceListActivity.class);
          //   startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
@@ -499,6 +595,19 @@ public class GilgaMesh extends Activity {
         return false;
     }
     
+    private PeerListListener peerListListener = new PeerListListener() {
+        @Override
+        public void onPeersAvailable(WifiP2pDeviceList peerList) {
+
+          Collection<WifiP2pDevice> deviceList = peerList.getDeviceList();
+
+          for (WifiP2pDevice device : deviceList)
+          {
+          		processDiscoveredDevice(device.deviceName,device.deviceAddress,false);
+        	  
+          }
+        }
+    };
 
     // The BroadcastReceiver that listens for discovered devices and
     // changes the title when discovery is finished
@@ -514,33 +623,7 @@ public class GilgaMesh extends Activity {
                 
                 if (device.getName() != null)
                 {
-                	String messageBuffer = device.getName();
-                	String from = device.getAddress();
-                	
-                	StringTokenizer st = new StringTokenizer(messageBuffer,"\n");
-                	
-                	while (st.hasMoreTokens())
-                	{
-                	
-                		String message = st.nextToken();
-                		
-	                	if (message.startsWith("#")||message.startsWith("!")||message.startsWith("@")||message.startsWith(" "))
-	                	{
-	                		message = message.trim();
-		                	String hash = MD5(message+device.getAddress());
-		                			
-		                	if (!mMessageLog.containsKey(hash))
-		                	{	
-		                		from = mapToNickname (device.getAddress());
-		                		
-		                		if (device.getBondState() == BluetoothDevice.BOND_BONDED)
-		                			from += '*';
-		                		
-		                		mMessageLog.put(hash, new Date());
-		                		mConversationArrayAdapter.add(from + ": " + message);
-		                	}
-	                	}
-                	}
+                	processDiscoveredDevice(device.getName(),device.getAddress(),device.getBondState() == BluetoothDevice.BOND_BONDED);
                 }
                 
             // When discovery is finished, change the Activity title
@@ -548,15 +631,74 @@ public class GilgaMesh extends Activity {
                 
                 mBluetoothAdapter.startDiscovery();
             }
+            else if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
+                // Determine if Wifi P2P mode is enabled or not, alert
+                // the Activity.
+                int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
+                if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
+                	Toast.makeText(GilgaMesh.this, "Wifi P2P enhanced mode activated!", Toast.LENGTH_LONG).show();
+                
+                } 
+                
+            } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
+
+                // The peer list has changed!  We should probably do something about
+                // that.
+                mWifiManager.requestPeers(mWifiChannel, peerListListener);
+
+            } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
+
+                // Connection state changed!  We should probably do something about
+                // that.
+
+            	Log.d(TAG,"connection changed");
+            	
+            } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
+                
+            	WifiP2pDevice device = (WifiP2pDevice) intent.getParcelableExtra(
+                        WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+
+            }
         }
     };
+    
+    private void processDiscoveredDevice (String name, String address, boolean trusted)
+    {
+    	String messageBuffer = name;
+    	String from = address;
+    	
+    	StringTokenizer st = new StringTokenizer(messageBuffer,"\n");
+    	
+    	while (st.hasMoreTokens())
+    	{
+    	
+    		String message = st.nextToken();
+    		
+        	if (message.startsWith("#")||message.startsWith("!")||message.startsWith("@")||message.startsWith(" "))
+        	{
+        		message = message.trim();
+            	String hash = MD5(message+address);
+            			
+            	if (!mMessageLog.containsKey(hash))
+            	{	
+            		from = mapToNickname (address);
+            		
+            		if (trusted)
+            			from += '*';
+            		
+            		mMessageLog.put(hash, new Date());
+            		mConversationArrayAdapter.add(from + ": " + message);
+            	}
+        	}
+    	}
+    }
     
     public static String mapToNickname (String hexAddress)
     {
     	//remove : and get last 6 characters
     	hexAddress = hexAddress.replace(":", "");
     	hexAddress = hexAddress.substring(hexAddress.length()-7,hexAddress.length()-1);
-    	return hexAddress;
+    	return hexAddress.toUpperCase();
     }
     
     public String MD5(String md5) {
