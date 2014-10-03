@@ -99,6 +99,10 @@ public class GilgaMesh extends Activity {
     private StringBuffer mOutStringBuffer;
     // Local Bluetooth adapter
     private BluetoothAdapter mBluetoothAdapter = null;
+    
+    //Local Device Address
+    private String mLocalAddress = null;
+    
     // Member object for the chat services
     private BluetoothChatService mChatService = null;
 
@@ -127,6 +131,9 @@ public class GilgaMesh extends Activity {
             finish();
             return;
         }
+        
+        mLocalAddress = mapToNickname(mBluetoothAdapter.getAddress());
+        
         
         mChatService = new BluetoothChatService(this, mHandler);
 
@@ -268,7 +275,7 @@ public class GilgaMesh extends Activity {
 					int arg2, long arg3) {
 				
 				String message = mConversationArrayAdapter.getItem(arg2);
-				mOutEditText.setText('!' + message);
+				mOutEditText.setText("RT @" + message); 
 				
 				return false;
 			}
@@ -461,7 +468,7 @@ public class GilgaMesh extends Activity {
                     break;
                 case BluetoothChatService.STATE_LISTEN:
                 case BluetoothChatService.STATE_NONE:
-                    setStatus(getString(R.string.broadcast_mode_public_) + " | " + getString(R.string.you_are_) + mapToNickname(mBluetoothAdapter.getAddress()));
+                    setStatus(getString(R.string.broadcast_mode_public_) + " | " + getString(R.string.you_are_) + mLocalAddress);
                     break;
                 }
                 break;
@@ -658,23 +665,56 @@ public class GilgaMesh extends Activity {
         	if (message.startsWith("#")||message.startsWith("!")||message.startsWith("@")||message.startsWith(" "))
         	{
         		message = message.trim();
-            	String hash = MD5(message+address);
-            			
-            	if (!mMessageLog.containsKey(hash)) //have we seen this message before
+        	
+            	if (isNewMessage(message)) //have we seen this message before
             	{	
             		from = mapToNickname (address);
             		
             		if (trusted)
             			from += '*';
             		
-            		mMessageLog.put(hash, new Date());
             		mConversationArrayAdapter.add(from + ": " + message);
             		
-            		if (trusted && mRepeaterMode)
-            			sendMessage("RT @" + from + ": " + message); //retweet!
+            		if (trusted && mRepeaterMode && (!message.contains('@' + mLocalAddress))) //don't RT my own tweet
+            		{
+            			String rtMessage = "RT @" + from + ": " + message;
+            			sendMessage(rtMessage); //retweet!
+            			
+            		}
             	}
         	}
     	}
+    }
+    
+    private boolean isNewMessage (String message)
+    {
+    	String messageBody = message;
+    	
+    	if (messageBody.indexOf(':')!=-1)
+    	{
+    		messageBody = messageBody.substring(messageBody.lastIndexOf(':')+1).trim();
+    		String hash = MD5(messageBody);
+    		if (mMessageLog.containsKey(hash))
+    			return false;
+    		else
+    		{
+    			mMessageLog.put(hash, new Date());
+    			return true;
+    		}
+    	}
+    	else
+    	{
+    		String hash = MD5(messageBody);
+    		if (mMessageLog.containsKey(hash))
+    			return false;
+    		else
+    		{
+    			mMessageLog.put(hash, new Date());
+    			return true;
+    		}
+    	}
+    	
+    	
     }
     
     public static String mapToNickname (String hexAddress)
