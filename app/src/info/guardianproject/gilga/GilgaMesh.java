@@ -68,7 +68,7 @@ import android.widget.Toast;
  */
 public class GilgaMesh extends Activity {
     // Debugging
-    private static final String TAG = "BluetoothChat";
+    private static final String TAG = "GILGA";
     private static final boolean D = true;
 
     // Message types sent from the BluetoothChatService Handler
@@ -83,8 +83,7 @@ public class GilgaMesh extends Activity {
     public static final String TOAST = "toast";
 
     // Intent request codes
-    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
-    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
+    private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 3;
 
     // Layout Views
@@ -105,6 +104,8 @@ public class GilgaMesh extends Activity {
 
     private Hashtable<String,Date> mMessageLog = null;
     
+    private boolean mRepeaterMode = true; //by deafult RT trusted messages
+    
     //for WifiP2P mode
     WifiP2pManager mWifiManager = null;
     Channel mWifiChannel = null;
@@ -122,12 +123,12 @@ public class GilgaMesh extends Activity {
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
-            Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.please_enable_bluetooth_to_use_this_app, Toast.LENGTH_LONG).show();
             finish();
             return;
         }
         
-        
+        mChatService = new BluetoothChatService(this, mHandler);
 
         mWifiManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mWifiChannel = mWifiManager.initialize(this, getMainLooper(), new ChannelListener()
@@ -238,7 +239,7 @@ public class GilgaMesh extends Activity {
         	 startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
             
         } else {
-            if (mChatService == null) setupChat();
+             setupChat();
         }
     }
 
@@ -247,17 +248,7 @@ public class GilgaMesh extends Activity {
         super.onResume();
         if(D) Log.e(TAG, "+ ON RESUME +");
 
-        // Performing this check in onResume() covers the case in which BT was
-        // not enabled during onStart(), so we were paused to enable it...
-        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
-        if (mChatService != null) {
-            // Only if the state is STATE_NONE, do we know that we haven't started already
-            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
-              // Start the Bluetooth chat services
-              mChatService.start();
-            }
-            
-        }
+        
     }
 
     private void setupChat() {
@@ -299,9 +290,7 @@ public class GilgaMesh extends Activity {
             }
         });
 
-        // Initialize the BluetoothChatService to perform bluetooth connections
-        mChatService = new BluetoothChatService(this, mHandler);
-
+   
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
 
@@ -345,6 +334,15 @@ public class GilgaMesh extends Activity {
             startActivity(discoverableIntent);
             
         }
+
+       if (mChatService != null) {
+           // Only if the state is STATE_NONE, do we know that we haven't started already
+           if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+             // Start the Bluetooth chat services
+             mChatService.start();
+           }
+           
+       }
         
     }
     
@@ -502,9 +500,19 @@ public class GilgaMesh extends Activity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(D) Log.d(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
-        case REQUEST_CONNECT_DEVICE_SECURE:
+       
+        case REQUEST_CONNECT_DEVICE:
             // When DeviceListActivity returns with a device to connect
             if (resultCode == Activity.RESULT_OK) {
+
+                if (mChatService != null) {
+                    // Only if the state is STATE_NONE, do we know that we haven't started already
+                    if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+                      // Start the Bluetooth chat services
+                      mChatService.start();
+                    }
+                    
+                }
 
                 // Get the device MAC address
                 String address = data.getExtras()
@@ -512,28 +520,7 @@ public class GilgaMesh extends Activity {
                 connectDevice(address);
             }
             break;
-        case REQUEST_CONNECT_DEVICE_INSECURE:
-            // When DeviceListActivity returns with a device to connect
-            if (resultCode == Activity.RESULT_OK) {
-
-                // Get the device MAC address
-                String address = data.getExtras()
-                    .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-                connectDevice(address);
-            }
-            break;
-        case REQUEST_ENABLE_BT:
-            // When the request to allow discoverability returns
-            if (resultCode == Activity.RESULT_CANCELED) {
-                // User did not allow discoverability or an error occurred
-                Log.d(TAG, "BT not enabled");
-                Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
-                finish();
-            } else {
-                // Bluetooth is now enabled, so set up a chat session
-                setupChat();
-            }
-            break;
+        
         }
     }
 
@@ -577,18 +564,14 @@ public class GilgaMesh extends Activity {
        //     serverIntent = new Intent(this, DeviceListActivity.class);
          //   startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
            // return true;
-        case R.id.insecure_connect_scan:
+        case R.id.connect_scan:
             // Launch the DeviceListActivity to see devices and do scan
             serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_INSECURE);
+            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
             return true;
         case R.id.share_app:
         	shareAPKFile();
         	break;
-        //case R.id.discoverable:
-            // Ensure this device is discoverable by others
-          //  ensureDiscoverable();
-          //  return true;
         }
         return false;
     }
@@ -601,7 +584,7 @@ public class GilgaMesh extends Activity {
 
           for (WifiP2pDevice device : deviceList)
           {
-          		processDiscoveredDevice(device.deviceName,device.deviceAddress,false);
+        	  processInboundMessage(device.deviceName,device.deviceAddress,false);
         	  
           }
         }
@@ -621,7 +604,7 @@ public class GilgaMesh extends Activity {
                 
                 if (device.getName() != null)
                 {
-                	processDiscoveredDevice(device.getName(),device.getAddress(),device.getBondState() == BluetoothDevice.BOND_BONDED);
+                	processInboundMessage(device.getName(),device.getAddress(),device.getBondState() == BluetoothDevice.BOND_BONDED);
                 }
                 
             // When discovery is finished, change the Activity title
@@ -634,7 +617,7 @@ public class GilgaMesh extends Activity {
                 // the Activity.
                 int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
                 if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
-                	Toast.makeText(GilgaMesh.this, "Wifi P2P enhanced mode activated!", Toast.LENGTH_LONG).show();
+                //	Toast.makeText(GilgaMesh.this, "Wifi P2P enhanced mode activated!", Toast.LENGTH_LONG).show();
                 
                 } 
                 
@@ -660,7 +643,7 @@ public class GilgaMesh extends Activity {
         }
     };
     
-    private void processDiscoveredDevice (String name, String address, boolean trusted)
+    private void processInboundMessage (String name, String address, boolean trusted)
     {
     	String messageBuffer = name;
     	String from = address;
@@ -677,7 +660,7 @@ public class GilgaMesh extends Activity {
         		message = message.trim();
             	String hash = MD5(message+address);
             			
-            	if (!mMessageLog.containsKey(hash))
+            	if (!mMessageLog.containsKey(hash)) //have we seen this message before
             	{	
             		from = mapToNickname (address);
             		
@@ -686,6 +669,9 @@ public class GilgaMesh extends Activity {
             		
             		mMessageLog.put(hash, new Date());
             		mConversationArrayAdapter.add(from + ": " + message);
+            		
+            		if (trusted && mRepeaterMode)
+            			sendMessage("RT @" + from + ": " + message); //retweet!
             	}
         	}
     	}

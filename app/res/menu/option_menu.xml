@@ -14,13 +14,10 @@
      limitations under the License.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-  <!--   <item android:id="@+id/secure_connect_scan"
+
+    <item android:id="@+id/connect_scan"
           android:icon="@android:drawable/ic_menu_search"
-          android:title="@string/secure_connect"
-          android:showAsAction="never" /> -->
-    <item android:id="@+id/insecure_connect_scan"
-          android:icon="@android:drawable/ic_menu_search"
-          android:title="@string/insecure_connect"
+          android:title="@string/connect"
           android:showAsAction="never" />
     
     <item android:id="@+id/share_app"

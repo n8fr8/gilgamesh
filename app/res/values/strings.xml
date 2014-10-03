@@ -35,8 +35,7 @@
     <string name="button_scan">Scan for devices</string>
 
     <!-- Options Menu -->
-    <string name="secure_connect">Connect a device - Secure</string>
-    <string name="insecure_connect">Direct Message</string>
+    <string name="connect">Direct Message</string>
     <string name="discoverable">Make discoverable</string>
     <string name="connected_to_">"Connected to "</string>
     <string name="me_">"Me:  "</string>
@@ -45,4 +44,6 @@
     <string name="you_are_">"You are: "</string>
     
     <string name="share_app">Share App</string>
+    
+    <string name="please_enable_bluetooth_to_use_this_app">Please enable Bluetooth to use this app</string>
 </resources>
