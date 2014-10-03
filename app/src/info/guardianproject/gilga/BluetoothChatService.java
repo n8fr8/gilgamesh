@@ -265,11 +265,13 @@ public class BluetoothChatService {
      */
     private void connectionLost() {
         // Send a failure message back to the Activity
+    	/**
         Message msg = mHandler.obtainMessage(GilgaMesh.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(GilgaMesh.TOAST, "Device connection was lost");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
+        */
 
         // Start the service over to restart listening mode
         BluetoothChatService.this.start();

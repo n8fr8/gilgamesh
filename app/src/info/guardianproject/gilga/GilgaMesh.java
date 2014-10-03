@@ -22,6 +22,7 @@ import java.util.Hashtable;
 import java.util.StringTokenizer;
 
 import android.app.ActionBar;
+import android.app.ActionBar.Tab;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -115,7 +116,37 @@ public class GilgaMesh extends Activity {
             return;
         }
         
+      //  createTabs();
         
+        
+    }
+    
+    private void createTabs ()
+    {
+    	 ActionBar actionBar = getActionBar();
+         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+  
+         actionBar.setDisplayShowTitleEnabled(true);
+  
+         /** Creating ANDROID Tab */
+         Tab tab = actionBar.newTab()
+             .setText("! Broadcast");
+         
+         //    .setTabListener(new CustomTabListener<AndroidFragment>(this, "android", AndroidFragment.class))
+          //   .setIcon(R.drawable.android);
+  
+         actionBar.addTab(tab);
+  
+         /** Creating APPLE Tab */
+         tab = actionBar.newTab()
+             .setText("@ Replies");
+ 
+         actionBar.addTab(tab);
+         
+         tab = actionBar.newTab()
+                 .setText("Direct Messages");
+     
+             actionBar.addTab(tab);
     }
 
     @Override
@@ -199,7 +230,7 @@ public class GilgaMesh extends Activity {
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
 
-        ensureDiscoverable();
+        startListening();
     }
 
     @Override
@@ -232,16 +263,21 @@ public class GilgaMesh extends Activity {
 
     }
 
-    private void ensureDiscoverable() {
+    private void startBroadcasting() {
         if(D) Log.d(TAG, "ensure discoverable");
-        if (mBluetoothAdapter.getScanMode() !=
-            BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+       if (mBluetoothAdapter.getScanMode() !=
+          BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
         	
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 3600);
             startActivity(discoverableIntent);
             
         }
+        
+    }
+    
+    private void startListening ()
+    {
         
 
         // Register for broadcasts when a device is discovered
@@ -282,6 +318,8 @@ public class GilgaMesh extends Activity {
             	
             	mBluetoothAdapter.setName(mOutStringBuffer.toString());
         		mConversationArrayAdapter.add(getString(R.string.me_)+ message);
+        		
+        		startBroadcasting() ;
             }
             
             		
@@ -326,7 +364,6 @@ public class GilgaMesh extends Activity {
                 switch (msg.arg1) {
                 case BluetoothChatService.STATE_CONNECTED:
                     setStatus(getString(R.string.title_connected_to, mConnectedDeviceName) + ' ' + getString(R.string._private_));
-                    mConversationArrayAdapter.clear();
                     break;
                 case BluetoothChatService.STATE_CONNECTING:
                     setStatus(R.string.title_connecting);
@@ -334,7 +371,6 @@ public class GilgaMesh extends Activity {
                 case BluetoothChatService.STATE_LISTEN:
                 case BluetoothChatService.STATE_NONE:
                     setStatus(getString(R.string.broadcast_mode_public_) + " | " + getString(R.string.you_are_) + mapToNickname(mBluetoothAdapter.getAddress()));
-                    mConversationArrayAdapter.clear();
                     break;
                 }
                 break;
@@ -376,13 +412,21 @@ public class GilgaMesh extends Activity {
         case REQUEST_CONNECT_DEVICE_SECURE:
             // When DeviceListActivity returns with a device to connect
             if (resultCode == Activity.RESULT_OK) {
-                connectDevice(data);
+
+                // Get the device MAC address
+                String address = data.getExtras()
+                    .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+                connectDevice(address);
             }
             break;
         case REQUEST_CONNECT_DEVICE_INSECURE:
             // When DeviceListActivity returns with a device to connect
             if (resultCode == Activity.RESULT_OK) {
-                connectDevice(data);
+
+                // Get the device MAC address
+                String address = data.getExtras()
+                    .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+                connectDevice(address);
             }
             break;
         case REQUEST_ENABLE_BT:
@@ -399,10 +443,7 @@ public class GilgaMesh extends Activity {
         }
     }
 
-    private void connectDevice(Intent data) {
-        // Get the device MAC address
-        String address = data.getExtras()
-            .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+    private void connectDevice(String address) {
         // Get the BluetoothDevice object
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         
@@ -509,9 +550,12 @@ public class GilgaMesh extends Activity {
         }
     };
     
-    private String mapToNickname (String hexAddress)
+    public static String mapToNickname (String hexAddress)
     {
-    	return hexAddress.replace(":", "").substring(0,6);
+    	//remove : and get last 6 characters
+    	hexAddress = hexAddress.replace(":", "");
+    	hexAddress = hexAddress.substring(hexAddress.length()-7,hexAddress.length()-1);
+    	return hexAddress;
     }
     
     public String MD5(String md5) {
