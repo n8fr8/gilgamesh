@@ -757,6 +757,7 @@ public class GilgaMesh extends Activity {
 
         Intent intent = new Intent();  
         intent.setAction(Intent.ACTION_SEND);  
+        intent.setPackage("com.android.bluetooth");
         intent.setType("*/*");
         intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(uri)));
         startActivity(intent);
