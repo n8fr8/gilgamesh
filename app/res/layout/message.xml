@@ -13,9 +13,17 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+
+<TextView
+     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textSize="18sp"
     android:padding="5dp"
+    android:layout_margin="5dp"
+    android:background="#efefef"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:fontFamily="sans-serif-light"
+    android:autoLink="web|email|phone|map"
+    
 />
+  

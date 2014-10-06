@@ -22,25 +22,32 @@
     <ListView android:id="@+id/in"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:stackFromBottom="true"
+        android:stackFromBottom="false"
         android:transcriptMode="alwaysScroll"
         android:layout_weight="1"
+        android:background="#dedede"
+        android:divider="@null"
+		android:dividerHeight="0dp"
+
     />
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#ffffff"
         >
         <EditText android:id="@+id/edit_text_out"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="bottom"
+            android:hint="post status update..."
         />
-        <Button android:id="@+id/button_send"
+        <ImageButton android:id="@+id/button_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/send"
+            android:src="@drawable/ic_send_holo_light"
+            android:background="#ffffff"
         />
     </LinearLayout>
 </LinearLayout>

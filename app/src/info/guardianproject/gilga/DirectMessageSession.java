@@ -37,7 +37,7 @@ import android.util.Log;
  * incoming connections, a thread for connecting with a device, and a
  * thread for performing data transmissions when connected.
  */
-public class BluetoothChatService {
+public class DirectMessageSession {
 	
     // Debugging
     private static final String TAG = "BluetoothChatService";
@@ -61,6 +61,7 @@ public class BluetoothChatService {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
+    private BluetoothDevice mDevice;
 
     // Constants that indicate the current connection state
     public static final int STATE_NONE = 0;       // we're doing nothing
@@ -73,7 +74,7 @@ public class BluetoothChatService {
      * @param context  The UI Activity Context
      * @param handler  A Handler to send messages back to the UI Activity
      */
-    public BluetoothChatService(Context context, Handler handler) {
+    public DirectMessageSession(Context context, Handler handler) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mState = STATE_NONE;
         mHandler = handler;
@@ -87,8 +88,14 @@ public class BluetoothChatService {
         if (D) Log.d(TAG, "setState() " + mState + " -> " + state);
         mState = state;
 
+        
         // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(GilgaMesh.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+       Message message = mHandler.obtainMessage(GilgaService.MESSAGE_STATE_CHANGE, state, -1);
+       
+       if (mDevice != null)
+        message.getData().putString("address", mDevice.getAddress());
+        
+        message.sendToTarget();
     }
 
     /**
@@ -130,6 +137,8 @@ public class BluetoothChatService {
     public synchronized void connect(BluetoothDevice device, boolean secure) {
         if (D) Log.d(TAG, "connect to: " + device);
 
+        mDevice = device;
+        
         // Cancel any thread attempting to make a connection
         if (mState == STATE_CONNECTING) {
             if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}
@@ -157,7 +166,7 @@ public class BluetoothChatService {
 
         // Start the thread to connect with the given device
      // Start the service over to restart listening mode
-        BluetoothChatService.this.start();
+        DirectMessageSession.this.start();
         setState(STATE_NONE);
     }
 
@@ -191,9 +200,9 @@ public class BluetoothChatService {
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
-        Message msg = mHandler.obtainMessage(GilgaMesh.MESSAGE_DEVICE_NAME);
+        Message msg = mHandler.obtainMessage(GilgaService.MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
-        bundle.putString(GilgaMesh.DEVICE_NAME, device.getAddress());
+        bundle.putString(GilgaMeshActivity.DEVICE_NAME, device.getAddress());
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
@@ -250,14 +259,14 @@ public class BluetoothChatService {
      */
     private void connectionFailed() {
         // Send a failure message back to the Activity
-        Message msg = mHandler.obtainMessage(GilgaMesh.MESSAGE_TOAST);
+        Message msg = mHandler.obtainMessage(GilgaService.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(GilgaMesh.TOAST, "Unable to connect device");
+        bundle.putString(GilgaMeshActivity.TOAST, "Unable to connect device");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
 
         // Start the service over to restart listening mode
-        BluetoothChatService.this.start();
+        DirectMessageSession.this.start();
     }
 
     /**
@@ -274,7 +283,7 @@ public class BluetoothChatService {
         */
 
         // Start the service over to restart listening mode
-        BluetoothChatService.this.start();
+        DirectMessageSession.this.start();
     }
 
     /**
@@ -326,7 +335,7 @@ public class BluetoothChatService {
 
                 // If a connection was accepted
                 if (socket != null) {
-                    synchronized (BluetoothChatService.this) {
+                    synchronized (DirectMessageSession.this) {
                         switch (mState) {
                         case STATE_LISTEN:
                         case STATE_CONNECTING:
@@ -418,7 +427,7 @@ public class BluetoothChatService {
             }
 
             // Reset the ConnectThread because we're done
-            synchronized (BluetoothChatService.this) {
+            synchronized (DirectMessageSession.this) {
                 mConnectThread = null;
             }
 
@@ -445,7 +454,7 @@ public class BluetoothChatService {
         private final OutputStream mmOutStream;
 
         public ConnectedThread(BluetoothSocket socket, String socketType) {
-            Log.d(TAG, "create ConnectedThread: " + socketType);
+          //  Log.d(TAG, "create ConnectedThread: " + socketType);
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
@@ -463,7 +472,7 @@ public class BluetoothChatService {
         }
 
         public void run() {
-            Log.i(TAG, "BEGIN mConnectedThread");
+        //    Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
             int bytes;
 
@@ -474,13 +483,16 @@ public class BluetoothChatService {
                     bytes = mmInStream.read(buffer);
 
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(GilgaMesh.MESSAGE_READ, bytes, -1, buffer)
-                            .sendToTarget();
+                    Message msg = mHandler.obtainMessage(GilgaService.MESSAGE_READ, bytes, -1, buffer);
+                    
+                    msg.getData().putString("address", mmSocket.getRemoteDevice().getAddress());
+                    
+                    msg.sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
                     // Start the service over to restart listening mode
-                    BluetoothChatService.this.start();
+                    DirectMessageSession.this.start();
                     break;
                 }
             }
@@ -495,7 +507,7 @@ public class BluetoothChatService {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(GilgaMesh.MESSAGE_WRITE, -1, -1, buffer)
+                mHandler.obtainMessage(GilgaService.MESSAGE_WRITE, -1, -1, buffer)
                         .sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
