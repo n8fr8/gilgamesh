@@ -108,7 +108,7 @@ public class GilgaMesh extends Activity {
 
     private Hashtable<String,Date> mMessageLog = null;
     
-    private boolean mRepeaterMode = true; //by deafult RT trusted messages
+    private boolean mRepeaterMode = false; //by default RT trusted messages
     
     //for WifiP2P mode
     WifiP2pManager mWifiManager = null;
@@ -761,7 +761,7 @@ public class GilgaMesh extends Activity {
 
         Intent intent = new Intent();  
         intent.setAction(Intent.ACTION_SEND);  
-        intent.setPackage("com.android.bluetooth");
+     //   intent.setPackage("com.android.bluetooth"); //let's not limit it to Bluetooth... who knows how you might want to share a file!
         intent.setType("*/*");
         intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(uri)));
         startActivity(intent);
