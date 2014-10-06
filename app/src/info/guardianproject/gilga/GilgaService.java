@@ -252,6 +252,29 @@ public class GilgaService extends Service {
             		}
             		
             	}
+            	
+            	if (mQueuedDirectMessage.size() > 0
+            			&& mDirectChatSession.getState() != DirectMessageSession.STATE_CONNECTED)
+            	{
+            		//try to do resend now if address matches
+            		
+            		if (address != null)
+                	{
+                		Iterator<DirectMessage> itDm = mQueuedDirectMessage.iterator();
+                		while (itDm.hasNext())
+                		{
+                			DirectMessage dm = itDm.next();
+                			
+                			if (dm.to.equals(address))
+                			{
+                		    	BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+                		    	boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
+                		    	mDirectChatSession.connect(device, isSecure);
+                		    	break;
+                			}
+                		}
+                	}
+            	}
         	}
     	}
     }
@@ -376,15 +399,19 @@ public class GilgaService extends Service {
     	while (st.hasMoreTokens())
     		dMessage.append(st.nextToken()).append(" ");
     	
-    	
     	DirectMessage dm = new DirectMessage();
     	dm.to = address;
     	dm.body = dMessage.toString().trim();
     	dm.ts = new java.util.Date().getTime();
+    	dm.delivered = false;
+
     	mQueuedDirectMessage.add(dm);
     	
     	BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
     	boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
+    	
+    	dm.trusted = isSecure;
+    	StatusAdapter.getInstance(this).add(dm);
     	
     	mDirectChatSession.connect(device, isSecure);
     }
@@ -507,6 +534,7 @@ public class GilgaService extends Service {
                 			{
                 				String dmText = dm.body + '\n';
                 				mDirectChatSession.write(dmText.getBytes());
+                				dm.delivered = true;
                 				listSent.add(dm);
                 			}
                 		}

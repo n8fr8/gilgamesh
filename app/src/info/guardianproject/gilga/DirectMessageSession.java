@@ -507,8 +507,12 @@ public class DirectMessageSession {
                 mmOutStream.write(buffer);
 
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(GilgaService.MESSAGE_WRITE, -1, -1, buffer)
-                        .sendToTarget();
+                Message msg = mHandler.obtainMessage(GilgaService.MESSAGE_WRITE, -1, -1, buffer);
+
+                msg.getData().putString("address", mmSocket.getRemoteDevice().getAddress());
+                
+                msg.sendToTarget();
+                
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }

@@ -1,9 +1,7 @@
 package info.guardianproject.gilga;
 
-public class DirectMessage {
+public class DirectMessage extends Status {
 
 	String to;
-	String body;
-	long ts;
-	
+	boolean delivered = false;
 }

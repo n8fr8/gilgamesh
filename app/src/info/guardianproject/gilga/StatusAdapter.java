@@ -68,29 +68,42 @@ public class StatusAdapter extends BaseAdapter
 	    TextView txtBody = (TextView) v.findViewById(R.id.body);
 	    TextView txtTime = (TextView) v.findViewById(R.id.time);
 	    
-	    String from = status.from;
-	    
-	    if (status.from.length() > 6)
+	    if (status instanceof DirectMessage)
 	    {
-	    	 from = GilgaService.mapToNickname(status.from);	 
-	    }
-	    
-	    if (status.trusted)
-	    	from += '*';
-	    
-	    String fromText = '@' + from;
-	    		
-	    if (status.type == Status.TYPE_DIRECT)
-	    {
-	    	fromText = ('@' + from + " (DIRECT MESSAGE)");
+	    	DirectMessage dm = (DirectMessage)status;
+	    	
+	    	String to = dm.to;
+	    	if (to.length() > 6)
+		    {
+		    	 to = GilgaService.mapToNickname(to);	 
+		    }
+		    
+	    	to = "DM " + to;
+	    	
+	    	if (dm.delivered)
+	    		to+=" \u2713";
+	    	
+	    	txtFrom.setText(to);
+
 	    	v.setBackgroundResource(R.color.holo_orange_light);
 	    }
 	    else
 	    {
+		    String from = status.from;
+		    
+		    if (status.from.length() > 6)
+		    {
+		    	 from = GilgaService.mapToNickname(status.from);	 
+		    }
+		    
+		    if (status.trusted)
+		    	from += '*';
+		    
+		    String fromText = '@' + from;
 	    	v.setBackgroundResource(android.R.color.transparent);
+
+	    	txtFrom.setText(fromText);
 	    }
-	    
-	    txtFrom.setText(fromText);
 	    
 	    txtBody.setText(status.body);
 	    
