@@ -157,7 +157,8 @@ public class GilgaMeshActivity extends Activity {
 
 						case R.id.item_reshare:
 
-							reshareStatus(status);
+							if (!(status instanceof DirectMessage)) //DM's can't be reshared
+								reshareStatus(status);
 							return true;
 						case R.id.item_copy:
 							
