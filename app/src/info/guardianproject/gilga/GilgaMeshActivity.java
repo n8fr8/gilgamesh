@@ -129,12 +129,6 @@ public class GilgaMeshActivity extends Activity {
     public synchronized void onResume() {
         super.onResume();
         
-        
-
-        IntentFilter filter = new IntentFilter();
-        // Register for broadcasts when a device is discovered
-        filter.addAction(GilgaService.ACTION_NEW_MESSAGE);
-        this.registerReceiver(mMessageReceiver, filter);
     }
 
     private void setupChat() {
@@ -219,8 +213,6 @@ public class GilgaMeshActivity extends Activity {
     @Override
     public synchronized void onPause() {
         super.onPause();
-        
-        unregisterReceiver(mMessageReceiver);
 
     }
    
@@ -314,7 +306,7 @@ public class GilgaMeshActivity extends Activity {
         	
         	break;
         /*
-        case REQUEST_CONNECT_DEVICE:
+        case REQUEST_CONNECT_DEVICE:Br
             // When DeviceListActivity returns with a device to connect
             if (resultCode == Activity.RESULT_OK) {
 
@@ -397,20 +389,6 @@ public class GilgaMeshActivity extends Activity {
         startActivity(intent);
     }
     
-    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            // When discovery finds a device
-            if (GilgaService.ACTION_NEW_MESSAGE.equals(action)) {
-                
-            	info.guardianproject.gilga.Status status = info.guardianproject.gilga.Status.inflate(intent);
-            	StatusAdapter.getInstance(GilgaMeshActivity.this).add(status);
-
-            	
-            } 
-        }
-    };
+  
     
 }

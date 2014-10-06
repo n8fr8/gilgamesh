@@ -233,26 +233,20 @@ public class GilgaService extends Service {
         	{
         		message = message.trim();
         		
-        		Status msg = new Status();
-        		msg.from = address;
-        		msg.body = message;
-        		msg.trusted = trusted;
-        		msg.type = messageType;
-        		msg.ts = new java.util.Date().getTime();
+        		Status status = new Status();
+        		status.from = address;
+        		status.body = message;
+        		status.trusted = trusted;
+        		status.type = messageType;
+        		status.ts = new java.util.Date().getTime();
         		
-            	if (isNewMessage(msg)) //have we seen this message before
+            	if (isNewMessage(status)) //have we seen this message before
             	{	
-            		Intent i = new Intent(ACTION_NEW_MESSAGE);  
-        		   i.putExtra("from",msg.from);
-        		   i.putExtra("body",msg.body);
-        		   i.putExtra("ts",msg.ts);
-        		   i.putExtra("trusted", msg.trusted);
-        		   i.putExtra("type",msg.type);
-        		   sendBroadcast(i);
+            		StatusAdapter.getInstance(this).add(status);
             		
             		if (trusted && mRepeaterMode && (!message.contains('@' + mLocalAddress))) //don't RT my own tweet
             		{
-            			String rtMessage = "RT @" + mapToNickname(msg.from) + ": " + msg.body;
+            			String rtMessage = "RT @" + mapToNickname(status.from) + ": " + status.body;
             			updateStatus(rtMessage); //retweet!
             			
             		}
@@ -531,6 +525,9 @@ public class GilgaService extends Service {
                 }
                 break;
             case MESSAGE_WRITE:
+            	
+            	//we just add it directly, but we should mark as delivered here
+            	/**
                 byte[] writeBuf = (byte[]) msg.obj;
                 // construct a string from the buffer
                 String writeMessage = new String(writeBuf);
@@ -541,6 +538,7 @@ public class GilgaService extends Service {
                 status.trusted = true;
                 status.type = Status.TYPE_DIRECT;
                 status.ts = new java.util.Date().getTime();
+                **/
             //    mStatusAdapter.add(status);
                 break;
             case MESSAGE_READ:
@@ -556,13 +554,7 @@ public class GilgaService extends Service {
                 statusRead.type = Status.TYPE_DIRECT;
                 statusRead.ts = new java.util.Date().getTime();
                 
-                Intent i = new Intent(ACTION_NEW_MESSAGE);  
-     		   i.putExtra("from",statusRead.from);
-     		   i.putExtra("body",statusRead.body);
-     		   i.putExtra("ts",statusRead.ts);
-     		   i.putExtra("trusted", statusRead.trusted);
-     		   i.putExtra("type",statusRead.type);
-     		   sendBroadcast(i);
+                StatusAdapter.getInstance(GilgaService.this).add(statusRead);
      		   
                 break;
             case MESSAGE_DEVICE_NAME:
