@@ -85,6 +85,10 @@ public class StatusAdapter extends BaseAdapter
 	    	fromText = ('@' + from + " (DIRECT MESSAGE)");
 	    	v.setBackgroundResource(R.color.holo_orange_light);
 	    }
+	    else
+	    {
+	    	v.setBackgroundResource(android.R.color.transparent);
+	    }
 	    
 	    txtFrom.setText(fromText);
 	    

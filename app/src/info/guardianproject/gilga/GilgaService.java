@@ -511,7 +511,8 @@ public class GilgaService extends Service {
                 			
                 			if (dm.to.equals(address))
                 			{
-                				mDirectChatSession.write(dm.body.getBytes());
+                				String dmText = dm.body + '\n';
+                				mDirectChatSession.write(dmText.getBytes());
                 				listSent.add(dm);
                 			}
                 		}
