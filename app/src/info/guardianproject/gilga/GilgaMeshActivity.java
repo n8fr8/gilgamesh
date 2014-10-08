@@ -248,7 +248,6 @@ public class GilgaMeshActivity extends Activity {
             statusMe.ts = new java.util.Date().getTime();
             statusMe.trusted = false;
             statusMe.body = message;
-            statusMe.type = Status.TYPE_PUBLIC;
             
         	StatusAdapter.getInstance(GilgaMeshActivity.this).add(statusMe);
         
