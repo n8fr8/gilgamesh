@@ -50,6 +50,8 @@ public class GilgaService extends Service {
     // String buffer for outgoing messages
     private StringBuffer mOutStringBuffer;
 
+    private StatusAdapter mStatusAdapter;
+    
 	@Override
 	public IBinder onBind(Intent arg0) {
 		// TODO Auto-generated method stub
@@ -119,6 +121,8 @@ public class GilgaService extends Service {
 
 	private void init ()
 	{
+		mStatusAdapter = StatusAdapter.getInstance(this);
+		
 		mMessageLog = new Hashtable<String,Status>();
 		
         // Get local Bluetooth adapter
@@ -179,7 +183,7 @@ public class GilgaService extends Service {
                 
                 if (device.getName() != null)
                 {
-                	processInboundMessage(device.getName(),device.getAddress(),device.getBondState() == BluetoothDevice.BOND_BONDED, Status.TYPE_PUBLIC);
+                	processInboundMessage(device.getName(),device.getAddress(),device.getBondState() == BluetoothDevice.BOND_BONDED);
                 }
                 
             // When discovery is finished, change the Activity title
@@ -218,7 +222,7 @@ public class GilgaService extends Service {
         }
     };
     
-    private void processInboundMessage (String name, String address, boolean trusted, int messageType)
+    private void processInboundMessage (String name, String address, boolean trusted)
     {
     	String messageBuffer = name;
     	
@@ -237,12 +241,11 @@ public class GilgaService extends Service {
         		status.from = address;
         		status.body = message;
         		status.trusted = trusted;
-        		status.type = messageType;
         		status.ts = new java.util.Date().getTime();
         		
             	if (isNewMessage(status)) //have we seen this message before
             	{	
-            		StatusAdapter.getInstance(this).add(status);
+            		mStatusAdapter.add(status);
             		
             		if (trusted && mRepeaterMode && (!message.contains('@' + mLocalAddress))) //don't RT my own tweet
             		{
@@ -353,10 +356,10 @@ public class GilgaService extends Service {
         	
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 3600);
+            discoverableIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(discoverableIntent);
             
         }
-
 
        if (mDirectChatSession == null)
        {
@@ -411,7 +414,7 @@ public class GilgaService extends Service {
     	boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
     	
     	dm.trusted = isSecure;
-    	StatusAdapter.getInstance(this).add(dm);
+    	mStatusAdapter.add(dm);
     	
     	mDirectChatSession.connect(device, isSecure);
     }
@@ -479,7 +482,7 @@ public class GilgaService extends Service {
           for (WifiP2pDevice device : deviceList)
           {
         	  boolean trusted = false; //not sure how to do this with wifi
-        	  processInboundMessage(device.deviceName,device.deviceAddress,trusted,Status.TYPE_PUBLIC);
+        	  processInboundMessage(device.deviceName,device.deviceAddress,trusted);
         	  
           }
         }
@@ -575,14 +578,13 @@ public class GilgaService extends Service {
                 String readMessage = new String(readBuf, 0, msg.arg1);
                 String addr = msg.getData().getString("address");
                 
-                Status statusRead = new Status();
-                statusRead.from = addr;
-                statusRead.body = readMessage;
-                statusRead.trusted = true;
-                statusRead.type = Status.TYPE_DIRECT;
-                statusRead.ts = new java.util.Date().getTime();
+                DirectMessage dm = new DirectMessage();
+                dm.from = addr;
+                dm.body = readMessage;
+                dm.trusted = true;
+                dm.ts = new java.util.Date().getTime();
                 
-                StatusAdapter.getInstance(GilgaService.this).add(statusRead);
+                mStatusAdapter.add(dm);
      		   
                 break;
             case MESSAGE_DEVICE_NAME:
