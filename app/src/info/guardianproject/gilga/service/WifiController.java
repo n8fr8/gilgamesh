@@ -48,6 +48,95 @@ public class WifiController {
 	        	
 	        });
 	        
+	        WifiP2pDnsSdServiceRequest serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
+	        mWifiManager.addServiceRequest(mWifiChannel,
+	                serviceRequest,
+	                new ActionListener() {
+	                    @Override
+	                    public void onSuccess() {
+	                        // Success!
+	    	            	Log.d(TAG,"SUCCESS: added service request wifi name service");
+
+	                    }
+
+	                    @Override
+	                    public void onFailure(int code) {
+	                        // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+	                    	Log.d(TAG,"FAILURED: added service request wifi name service: " + code);
+	                    }
+	                });
+	        
+	   }
+	   
+	   public void stopWifi ()
+	   {
+		   mWifiManager.stopPeerDiscovery(mWifiChannel, new WifiP2pManager.ActionListener() {
+
+	             @Override
+	             public void onSuccess() {
+	             	Log.d(TAG,"success on stop discover");
+	             	
+	             }
+
+	             @Override
+	             public void onFailure(int reasonCode) {
+	                 // Code for when the discovery initiation fails goes here.
+	                 // Alert the user that something went wrong.
+	             	Log.d(TAG,"FAIL on stop discovery: " + reasonCode);
+	             }
+
+	    	    });
+		   
+		   // Add the local service, sending the service info, network channel,
+	        // and listener that will be used to indicate success or failure of
+	        // the request.
+	        mWifiManager.clearLocalServices(mWifiChannel, new ActionListener() {
+	            @Override
+	            public void onSuccess() {
+	                // Command successful! Code isn't necessarily needed here,
+	                // Unless you want to update the UI or add logging statements.
+	            	Log.d(TAG,"SUCCESS: clear local wifi name service");
+	            }
+
+	            @Override
+	            public void onFailure(int arg0) {
+	                // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+	            	Log.d(TAG,"FAILURE: clear local wifi name service: err=" + arg0);
+	            }
+	        });
+	        
+	        mWifiManager.clearServiceRequests(mWifiChannel,	                
+	                new ActionListener() {
+	                    @Override
+	                    public void onSuccess() {
+	                        // Success!
+	    	            	Log.d(TAG,"SUCCESS: clear service request wifi name service");
+
+	                    }
+
+	                    @Override
+	                    public void onFailure(int code) {
+	                        // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+	                    	Log.d(TAG,"FAILURED: clear service request wifi name service: " + code);
+	                    }
+	                });
+		   
+		   mWifiManager.cancelConnect(mWifiChannel, new WifiP2pManager.ActionListener() {
+
+	             @Override
+	             public void onSuccess() {
+	             	Log.d(TAG,"success on cancel connect");
+	             	
+	             }
+
+	             @Override
+	             public void onFailure(int reasonCode) {
+	                 // Code for when the discovery initiation fails goes here.
+	                 // Alert the user that something went wrong.
+	             	Log.d(TAG,"FAIL on cancel connect: " + reasonCode);
+	             }
+
+	    	    });
 	   }
 	   
 	   public void setEnabled (boolean enabled)
@@ -137,7 +226,7 @@ public class WifiController {
 	                 // No services have actually been discovered yet, so this method
 	                 // can often be left blank.  Code for peer discovery goes in the
 	                 // onReceive method, detailed below.
-	             //	Log.d(TAG,"success on wifi discover");
+	             	Log.d(TAG,"success on wifi discover");
 	             	
 	             }
 
@@ -187,6 +276,21 @@ public class WifiController {
 	        WifiP2pDnsSdServiceInfo serviceInfo =
 	                WifiP2pDnsSdServiceInfo.newInstance("_test", "_presence._tcp", record);
 
+	        mWifiManager.clearLocalServices(mWifiChannel, new ActionListener() {
+	            @Override
+	            public void onSuccess() {
+	                // Command successful! Code isn't necessarily needed here,
+	                // Unless you want to update the UI or add logging statements.
+	            	Log.d(TAG,"SUCCESS: clear local wifi name service");
+	            }
+
+	            @Override
+	            public void onFailure(int arg0) {
+	                // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
+	            	Log.d(TAG,"FAILURE: clear local wifi name service: err=" + arg0);
+	            }
+	        });
+	        
 	        // Add the local service, sending the service info, network channel,
 	        // and listener that will be used to indicate success or failure of
 	        // the request.
@@ -205,23 +309,7 @@ public class WifiController {
 	            }
 	        });
 	        
-	        WifiP2pDnsSdServiceRequest serviceRequest = WifiP2pDnsSdServiceRequest.newInstance();
-	        mWifiManager.addServiceRequest(mWifiChannel,
-	                serviceRequest,
-	                new ActionListener() {
-	                    @Override
-	                    public void onSuccess() {
-	                        // Success!
-	    	            	Log.d(TAG,"SUCCESS: added service request wifi name service");
-
-	                    }
-
-	                    @Override
-	                    public void onFailure(int code) {
-	                        // Command failed.  Check for P2P_UNSUPPORTED, ERROR, or BUSY
-	                    	Log.d(TAG,"FAILURED: added service request wifi name service: " + code);
-	                    }
-	                });
+	
 	    }
 	    
 	    private void discoverWifiService() {
