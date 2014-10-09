@@ -7,6 +7,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -14,6 +17,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
@@ -654,6 +658,8 @@ public class GilgaService extends Service {
 	                dm.trusted = true;
 	                dm.ts = new java.util.Date().getTime();
 	                
+	                sendNotitication("DM FROM: " + addr, dm.body);
+	                
 	                mStatusAdapter.add(dm);
                 }
                 
@@ -671,6 +677,44 @@ public class GilgaService extends Service {
             }
         }
     };
+    
+    public void sendNotitication (String title, String message)
+    {
+    	Notification.Builder builder =
+    		    new Notification.Builder(this)
+    		    .setSmallIcon(R.drawable.ic_notify)
+    		    .setContentTitle(title)
+    		    .setContentText(message);
+    	
+    	  //Vibration
+        builder.setVibrate(new long[] { 500, 1000, 500 });
+        builder.setAutoCancel(true);
+
+     //LED
+        builder.setLights(Color.BLUE, 3000, 3000);
+        
+    	Intent resultIntent = new Intent(this, GilgaMeshActivity.class);
+    	
+    	// Because clicking the notification opens a new ("special") activity, there's
+    	// no need to create an artificial back stack.
+    	PendingIntent resultPendingIntent =
+    	    PendingIntent.getActivity(
+    	    this,
+    	    0,
+    	    resultIntent,
+    	    PendingIntent.FLAG_UPDATE_CURRENT
+    	);
+    	
+    	builder.setContentIntent(resultPendingIntent);
+
+    	// Sets an ID for the notification
+    	int mNotificationId = 001;
+    	// Gets an instance of the NotificationManager service
+    	NotificationManager mNotifyMgr = 
+    	        (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    	// Builds the notification and issues it.
+    	mNotifyMgr.notify(mNotificationId, builder.getNotification());
+    }
     
 
     // Message types sent from the BluetoothChatService Handler

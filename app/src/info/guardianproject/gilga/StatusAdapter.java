@@ -81,12 +81,15 @@ public class StatusAdapter extends BaseAdapter
 			    	 to = GilgaService.mapToNickname(to);	 
 			    }
 			    
-		    	to = "DM TO: " + to;
+		    	to = ">> DM TO: " + to;
 		    	
 		    	if (dm.delivered)
 		    		to+=" \u2713";
 		    	
 		    	txtFrom.setText(to);
+		    	
+
+		    	v.setBackgroundResource(R.color.holo_green_dark);
 	    	}
 	    	else if (dm.from != null)
 	    	{
@@ -97,15 +100,16 @@ public class StatusAdapter extends BaseAdapter
 			    	 from = GilgaService.mapToNickname(from);	 
 			    }
 			    
-		    	from = "DM FROM: " + from;
+		    	from = "<< DM FROM: " + from;
 		    	
 		    	if (dm.delivered)
 		    		from+=" \u2713";
 		    	
 		    	txtFrom.setText(from);
+
+		    	v.setBackgroundResource(R.color.holo_green_light);
 	    	}
 
-	    	v.setBackgroundResource(R.color.holo_orange_light);
 	    }
 	    else
 	    {
