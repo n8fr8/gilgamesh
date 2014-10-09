@@ -27,7 +27,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/from"
-        android:text="from"
         
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:fontFamily="sans-serif-light"
@@ -35,7 +34,7 @@
         />
  
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/body"
         android:layout_below="@id/from"
@@ -44,7 +43,6 @@
 	    android:textAppearance="?android:attr/textAppearanceMedium"
 	    android:fontFamily="sans-serif-light"
 	    
-        android:text="asdlkjasdlkjas dlkasjd laskjd lasdj laskdj alsdj lasdkj"
         />
  
     <TextView
@@ -58,7 +56,6 @@
         
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:fontFamily="sans-serif-light"
-        android:text="12 minutes ago"
         />
 </RelativeLayout>
 </LinearLayout>
