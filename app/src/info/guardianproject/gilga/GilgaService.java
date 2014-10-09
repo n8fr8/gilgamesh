@@ -14,12 +14,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
+import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.Handler;
 import android.os.IBinder;
@@ -34,12 +37,15 @@ public class GilgaService extends Service {
 	
     private static Hashtable<String,Status> mMessageLog = null;
     
-
+    private Handler mTimerHandler = new Handler();
+    private final static int BLUETOOTH_DISCOVERY_RETRY_TIMEOUT = 3000;
+    
     // Local Bluetooth adapter
    private BluetoothAdapter mBluetoothAdapter = null;
    
    //Local Device Address
-   private String mLocalAddress = null;
+   private String mLocalShortBluetoothAddress = "";
+   private String mLocalAddressHeader = "";
    
    //for WifiP2P mode
    WifiP2pManager mWifiManager = null;
@@ -72,13 +78,8 @@ public class GilgaService extends Service {
 	
 		if (intent != null)
 		{
-			if (intent.getBooleanExtra("listen", false))
-				startListening();
-		
 			if (intent.hasExtra("status"))
 			{
-				startBroadcasting();
-				
 				String status = intent.getStringExtra("status");
 				
 				if (status.matches("^(d |dm ).*$"))
@@ -90,6 +91,9 @@ public class GilgaService extends Service {
 				
 			}
 		}
+		
+		startListening();
+		
 		
 		//based on intent, startListening() or startBroadcasting or sendMessage()
 		
@@ -128,12 +132,12 @@ public class GilgaService extends Service {
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        mLocalAddress = mapToNickname(mBluetoothAdapter.getAddress());
-        
-        
+        mLocalShortBluetoothAddress = mapToNickname(mBluetoothAdapter.getAddress());
+        mLocalAddressHeader = mLocalShortBluetoothAddress.substring(0,5);
        // mChatService = new BluetoothChatService(this, mHandler);
 
         mWifiManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        
         mWifiChannel = mWifiManager.initialize(this, getMainLooper(), new ChannelListener()
         {
 
@@ -183,13 +187,48 @@ public class GilgaService extends Service {
                 
                 if (device.getName() != null)
                 {
-                	processInboundMessage(device.getName(),device.getAddress(),device.getBondState() == BluetoothDevice.BOND_BONDED);
+                	String address = device.getAddress();
+                	
+                	processInboundMessage(device.getName(),address,device.getBondState() == BluetoothDevice.BOND_BONDED);
+                	
+                	if (mQueuedDirectMessage.size() > 0 && mDirectChatSession != null
+                			&& (mDirectChatSession.getState() != DirectMessageSession.STATE_CONNECTED 
+                			|| mDirectChatSession.getState() != DirectMessageSession.STATE_CONNECTING))
+                	{
+                		//try to do resend now if address matches
+                		
+                		if (address != null)
+                    	{
+                			synchronized (mQueuedDirectMessage)
+                			{
+	                    		Iterator<DirectMessage> itDm = mQueuedDirectMessage.iterator();
+	                    		while (itDm.hasNext())
+	                    		{
+	                    			DirectMessage dm = itDm.next();
+	                    			
+	                    			if (dm.to.equals(address))
+	                    			{
+	                    		    	boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
+	                    		    	mDirectChatSession.connect(device, isSecure);
+	                    		    	break;
+	                    			}
+	                    		}
+                			}
+                    	}
+                	}
+                	
                 }
                 
             // When discovery is finished, change the Activity title
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                 
-                mBluetoothAdapter.startDiscovery();
+            	mHandler.postDelayed(new Runnable ()
+            	{
+            		public void run ()
+            		{
+                        mBluetoothAdapter.startDiscovery();
+            		}
+            	}, BLUETOOTH_DISCOVERY_RETRY_TIMEOUT);
             }
             else if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
                 // Determine if Wifi P2P mode is enabled or not, alert
@@ -210,6 +249,19 @@ public class GilgaService extends Service {
 
                 // Connection state changed!  We should probably do something about
                 // that.
+            	   NetworkInfo networkInfo = (NetworkInfo) intent
+                           .getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+
+                   mWifiManager.requestConnectionInfo(mWifiChannel, new ConnectionInfoListener()
+                   {
+
+					@Override
+					public void onConnectionInfoAvailable(WifiP2pInfo winfo) {
+						
+						
+					}
+                	   
+                   });
 
             	//Log.d(TAG,"connection changed");
             	
@@ -218,6 +270,10 @@ public class GilgaService extends Service {
             	WifiP2pDevice device = (WifiP2pDevice) intent.getParcelableExtra(
                         WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
 
+            	 boolean trusted = false; //not sure how to do this with wifi
+            	 
+            	 if (!mapToNickname(device.deviceAddress).startsWith(mLocalAddressHeader)) //not me
+           	  		processInboundMessage(device.deviceName,device.deviceAddress,trusted);
             }
         }
     };
@@ -247,7 +303,9 @@ public class GilgaService extends Service {
             	{	
             		mStatusAdapter.add(status);
             		
-            		if (trusted && mRepeaterMode && (!message.contains('@' + mLocalAddress))) //don't RT my own tweet
+            		if (trusted && mRepeaterMode             				
+            						&& (!message.contains('@' + mLocalAddressHeader))
+            				) //don't RT my own tweet
             		{
             			String rtMessage = "RT @" + mapToNickname(status.from) + ": " + status.body;
             			updateStatus(rtMessage); //retweet!
@@ -255,29 +313,7 @@ public class GilgaService extends Service {
             		}
             		
             	}
-            	
-            	if (mQueuedDirectMessage.size() > 0
-            			&& mDirectChatSession.getState() != DirectMessageSession.STATE_CONNECTED)
-            	{
-            		//try to do resend now if address matches
-            		
-            		if (address != null)
-                	{
-                		Iterator<DirectMessage> itDm = mQueuedDirectMessage.iterator();
-                		while (itDm.hasNext())
-                		{
-                			DirectMessage dm = itDm.next();
-                			
-                			if (dm.to.equals(address))
-                			{
-                		    	BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-                		    	boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
-                		    	mDirectChatSession.connect(device, isSecure);
-                		    	break;
-                			}
-                		}
-                	}
-            	}
+            
         	}
     	}
     }
@@ -360,6 +396,9 @@ public class GilgaService extends Service {
             startActivity(discoverableIntent);
             
         }
+       
+       if (!mBluetoothAdapter.isDiscovering())
+    	   mBluetoothAdapter.startDiscovery();
 
        if (mDirectChatSession == null)
        {
@@ -380,8 +419,8 @@ public class GilgaService extends Service {
     private void startListening ()
     {
         
-        if (!mBluetoothAdapter.isDiscovering())
-        	mBluetoothAdapter.startDiscovery();
+    	if (!mBluetoothAdapter.isDiscovering())
+    		mBluetoothAdapter.startDiscovery();
         
         startWifiDiscovery ();
        
@@ -410,13 +449,30 @@ public class GilgaService extends Service {
 
     	mQueuedDirectMessage.add(dm);
     	
-    	BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-    	boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
+    	final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+    	final boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
     	
     	dm.trusted = isSecure;
     	mStatusAdapter.add(dm);
     	
-    	mDirectChatSession.connect(device, isSecure);
+    	if (mDirectChatSession == null)
+    	{
+    	 mDirectChatSession = new DirectMessageSession(this, mHandler);
+  	   	 mDirectChatSession.start();
+    	}
+    	else
+    	{
+    		mDirectChatSession.disconnect();
+    	}
+    	
+    	mHandler.postAtTime(new Runnable ()
+    	{
+    		public void run ()
+    		{
+    	    	mDirectChatSession.connect(device, isSecure);
+    		}
+    	}, 2000);
+    	
     }
     
     
@@ -441,7 +497,6 @@ public class GilgaService extends Service {
         	
         	setWifiDeviceName(' ' + message);
         	
-    		
     		startBroadcasting() ;
             
             
@@ -451,6 +506,7 @@ public class GilgaService extends Service {
     
     private void startWifiDiscovery ()
     {
+    	
     	 mWifiManager.discoverPeers(mWifiChannel, new WifiP2pManager.ActionListener() {
 
              @Override
@@ -482,7 +538,11 @@ public class GilgaService extends Service {
           for (WifiP2pDevice device : deviceList)
           {
         	  boolean trusted = false; //not sure how to do this with wifi
-        	  processInboundMessage(device.deviceName,device.deviceAddress,trusted);
+        	  
+         	 if (!mapToNickname(device.deviceAddress).startsWith(mLocalAddressHeader)) //not me
+        		  processInboundMessage(device.deviceName,device.deviceAddress,trusted);
+        	  
+        	  
         	  
           }
         }
@@ -528,19 +588,25 @@ public class GilgaService extends Service {
                 	
                 	if (address != null)
                 	{
-                		Iterator<DirectMessage> itDm = mQueuedDirectMessage.iterator();
-                		while (itDm.hasNext())
+                		synchronized (mQueuedDirectMessage)
                 		{
-                			DirectMessage dm = itDm.next();
-                			
-                			if (dm.to.equals(address))
-                			{
-                				String dmText = dm.body + '\n';
-                				mDirectChatSession.write(dmText.getBytes());
-                				dm.delivered = true;
-                				listSent.add(dm);
-                			}
+	                		Iterator<DirectMessage> itDm = mQueuedDirectMessage.iterator();
+	                		while (itDm.hasNext())
+	                		{
+	                			DirectMessage dm = itDm.next();
+	                			
+	                			if (dm.to.equals(address))
+	                			{
+	                				String dmText = dm.body + '\n';
+	                				mDirectChatSession.write(dmText.getBytes());
+	                				dm.delivered = true;
+	                				mStatusAdapter.notifyDataSetChanged();
+	                				listSent.add(dm);
+	                			}
+	                		}
                 		}
+                		
+                		
                 	}
                 	
                 	mQueuedDirectMessage.removeAll(listSent);
@@ -578,14 +644,19 @@ public class GilgaService extends Service {
                 String readMessage = new String(readBuf, 0, msg.arg1);
                 String addr = msg.getData().getString("address");
                 
-                DirectMessage dm = new DirectMessage();
-                dm.from = addr;
-                dm.body = readMessage;
-                dm.trusted = true;
-                dm.ts = new java.util.Date().getTime();
+                StringTokenizer st = new StringTokenizer (readMessage,"\n");
                 
-                mStatusAdapter.add(dm);
-     		   
+                while (st.hasMoreTokens())
+                {
+	                DirectMessage dm = new DirectMessage();
+	                dm.from = addr;
+	                dm.body = st.nextToken();
+	                dm.trusted = true;
+	                dm.ts = new java.util.Date().getTime();
+	                
+	                mStatusAdapter.add(dm);
+                }
+                
                 break;
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name

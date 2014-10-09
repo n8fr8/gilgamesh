@@ -489,7 +489,7 @@ public class DirectMessageSession {
                     
                     msg.sendToTarget();
                 } catch (IOException e) {
-                    Log.e(TAG, "disconnected", e);
+                    Log.w(TAG, "disconnected", e);
                     connectionLost();
                     // Start the service over to restart listening mode
                     DirectMessageSession.this.start();

@@ -72,18 +72,38 @@ public class StatusAdapter extends BaseAdapter
 	    {
 	    	DirectMessage dm = (DirectMessage)status;
 	    	
-	    	String to = dm.to;
-	    	if (to.length() > 6)
-		    {
-		    	 to = GilgaService.mapToNickname(to);	 
-		    }
-		    
-	    	to = "DM " + to;
-	    	
-	    	if (dm.delivered)
-	    		to+=" \u2713";
-	    	
-	    	txtFrom.setText(to);
+	    	if (dm.to != null)
+	    	{
+		    	String to = dm.to;
+		    	
+		    	if (to.length() > 6)
+			    {
+			    	 to = GilgaService.mapToNickname(to);	 
+			    }
+			    
+		    	to = "DM TO: " + to;
+		    	
+		    	if (dm.delivered)
+		    		to+=" \u2713";
+		    	
+		    	txtFrom.setText(to);
+	    	}
+	    	else if (dm.from != null)
+	    	{
+	    		String from = dm.from;
+		    	
+		    	if (from.length() > 6)
+			    {
+			    	 from = GilgaService.mapToNickname(from);	 
+			    }
+			    
+		    	from = "DM FROM: " + from;
+		    	
+		    	if (dm.delivered)
+		    		from+=" \u2713";
+		    	
+		    	txtFrom.setText(from);
+	    	}
 
 	    	v.setBackgroundResource(R.color.holo_orange_light);
 	    }
