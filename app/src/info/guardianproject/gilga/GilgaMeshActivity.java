@@ -76,6 +76,8 @@ public class GilgaMeshActivity extends Activity {
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 3;
 
+    private boolean mRepeaterMode = false;
+    
     // Layout Views
     private ListView mConversationView;
     private EditText mOutEditText;
@@ -370,8 +372,20 @@ public class GilgaMeshActivity extends Activity {
         case R.id.shutdown_app:
         	shutdown();
         	break;
+        case R.id.toggle_repeater:
+        	toggleRepeater();        	
+        	break;
         }
         return false;
+    }
+    
+    private void toggleRepeater ()
+    {
+    	mRepeaterMode = !mRepeaterMode;
+
+        Intent intent = new Intent(this, GilgaService.class);
+        intent.putExtra("repeat", mRepeaterMode);
+        startService(intent);
     }
     
     private void shutdown ()

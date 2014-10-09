@@ -50,4 +50,6 @@
     <string name="_is_running">" is running"</string>
     
     <string name="shutdown_app">Shutdown</string>
+    <string name="toggle_repeater">Toggle Repeater</string>
+    <string name="repeater_enabled">REPEATER ENABLED</string>
 </resources>

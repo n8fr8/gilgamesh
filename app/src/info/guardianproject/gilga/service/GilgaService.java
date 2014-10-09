@@ -101,6 +101,11 @@ public class GilgaService extends Service {
 					updateStatus (status);
 				
 			}
+			
+			if (intent.hasExtra("repeat"))
+			{
+				mRepeaterMode = intent.getBooleanExtra("repeat", false);
+			}
 		}
 		
 		startListening();
@@ -132,12 +137,20 @@ public class GilgaService extends Service {
 
 	private void startForegroundNotify ()
 	{
+		
+		String message = getString(R.string.app_name) + getString(R.string._is_running);
+		
+		if (mRepeaterMode)
+			message += " | " + getString(R.string.repeater_enabled);
+			
 		Notification.Builder builder =
     		    new Notification.Builder(this)
     		    .setSmallIcon(R.drawable.ic_notify)
     		    .setContentTitle(getString(R.string.app_name))
-    		    .setContentText(getString(R.string.app_name) + getString(R.string._is_running));
+    		    .setContentText(message);
     	
+		if (mRepeaterMode)
+			builder.setTicker(getString(R.string.repeater_enabled));		
     	        
     	Intent resultIntent = new Intent(this, GilgaMeshActivity.class);
     	
@@ -231,13 +244,20 @@ public class GilgaService extends Service {
             	{	
             		mStatusAdapter.add(status);
             		
-            		if (trusted && mRepeaterMode             				
+            		if (mRepeaterMode             				
             						&& (!message.contains('@' + mLocalAddressHeader))
             				) //don't RT my own tweet
             		{
-            			String rtMessage = "RT @" + mapToNickname(status.from) + ": " + status.body;
+            			String rtMessage = "RPT @" + mapToNickname(status.from) + ": " + status.body;
             			updateStatus(rtMessage); //retweet!
-            			
+
+            			Status statusMe = new Status();
+                        statusMe.from = getString(R.string.me_);
+                        statusMe.ts = status.ts;
+                        statusMe.trusted = trusted;
+                        statusMe.body = rtMessage;
+                		mStatusAdapter.add(statusMe);
+
             		}
             		
             	}

@@ -38,7 +38,7 @@ public class StatusAdapter extends BaseAdapter
 	public void add (Status status)
 	{
 		mArrayStatus.add(status);
-		notifyDataSetChanged();
+		notifyDataSetChanged();		
 	}
 	
 	@Override
