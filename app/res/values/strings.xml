@@ -46,4 +46,8 @@
     <string name="share_app">Share App</string>
     
     <string name="please_enable_bluetooth_to_use_this_app">Please enable Bluetooth to use this app</string>
+    
+    <string name="_is_running">" is running"</string>
+    
+    <string name="shutdown_app">Shutdown</string>
 </resources>

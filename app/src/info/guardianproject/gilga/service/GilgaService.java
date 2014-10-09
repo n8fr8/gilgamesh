@@ -105,18 +105,18 @@ public class GilgaService extends Service {
 		
 		startListening();
 		
-		
-		//based on intent, startListening() or startBroadcasting or sendMessage()
-		
-		return super.onStartCommand(intent, flags, startId);
-	}
 
+		startForegroundNotify();
+		
+	    return (START_STICKY);
+	}
 
 
 	@Override
     public void onDestroy() {
         super.onDestroy();
         
+        stopForeground(true);
         // Stop the Bluetooth chat services
         if (mDirectChatSession != null) mDirectChatSession.stop();
         
@@ -124,10 +124,40 @@ public class GilgaService extends Service {
         if (mBluetoothAdapter != null && mBluetoothAdapter.isDiscovering())
         	mBluetoothAdapter.cancelDiscovery();
         
+        mWifiController.stopWifi();
+        
         this.unregisterReceiver(mReceiver);
 
     }
 
+	private void startForegroundNotify ()
+	{
+		Notification.Builder builder =
+    		    new Notification.Builder(this)
+    		    .setSmallIcon(R.drawable.ic_notify)
+    		    .setContentTitle(getString(R.string.app_name))
+    		    .setContentText(getString(R.string.app_name) + getString(R.string._is_running));
+    	
+    	        
+    	Intent resultIntent = new Intent(this, GilgaMeshActivity.class);
+    	
+    	// Because clicking the notification opens a new ("special") activity, there's
+    	// no need to create an artificial back stack.
+    	PendingIntent resultPendingIntent =
+    	    PendingIntent.getActivity(
+    	    this,
+    	    0,
+    	    resultIntent,
+    	    PendingIntent.FLAG_UPDATE_CURRENT
+    	);
+    	
+    	builder.setContentIntent(resultPendingIntent);
+
+    	// Sets an ID for the notification
+    	int mNotificationId = 002;
+    	
+    	startForeground(mNotificationId,builder.getNotification());
+	}
 
 	public static Hashtable<String,Status> getMessageLog ()
 	{

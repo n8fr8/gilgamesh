@@ -25,6 +25,10 @@
     <item android:id="@+id/share_app"
         android:title="@string/share_app"
         android:showAsAction="never"/>
+    
+    <item android:id="@+id/shutdown_app"
+        android:title="@string/shutdown_app"
+        android:showAsAction="never"/>
     <!-- 
     <item android:id="@+id/discoverable"
           android:icon="@android:drawable/ic_menu_mylocation"

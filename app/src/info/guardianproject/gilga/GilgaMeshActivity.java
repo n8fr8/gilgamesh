@@ -367,12 +367,20 @@ public class GilgaMeshActivity extends Activity {
         case R.id.share_app:
         	shareAPKFile();
         	break;
+        case R.id.shutdown_app:
+        	shutdown();
+        	break;
         }
         return false;
     }
     
-    
-  
+    private void shutdown ()
+    {
+
+        Intent intent = new Intent(this, GilgaService.class);
+        stopService(intent);
+        finish();
+    }
 
     private void shareAPKFile ()
     {
