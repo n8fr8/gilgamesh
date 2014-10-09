@@ -1,4 +1,10 @@
-package info.guardianproject.gilga;
+package info.guardianproject.gilga.model;
+
+import info.guardianproject.gilga.R;
+import info.guardianproject.gilga.R.color;
+import info.guardianproject.gilga.R.id;
+import info.guardianproject.gilga.R.layout;
+import info.guardianproject.gilga.service.GilgaService;
 
 import java.util.ArrayList;
 

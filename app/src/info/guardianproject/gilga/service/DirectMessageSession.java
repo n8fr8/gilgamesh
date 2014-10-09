@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package info.guardianproject.gilga;
+package info.guardianproject.gilga.service;
+
+import info.guardianproject.gilga.GilgaMeshActivity;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -16,6 +16,8 @@
 
 package info.guardianproject.gilga;
 
+import info.guardianproject.gilga.service.GilgaService;
+
 import java.util.Set;
 
 import android.app.Activity;

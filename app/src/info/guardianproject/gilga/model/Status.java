@@ -1,14 +1,14 @@
-package info.guardianproject.gilga;
+package info.guardianproject.gilga.model;
 
 import android.content.Intent;
 
 public class Status {
 
-	String from;
-	String body;
-	long ts;
-	boolean trusted = false;
-	int type;
+	public String from;
+	public String body;
+	public long ts;
+	public boolean trusted = false;
+	public int type;
 	
 	public static Status inflate (Intent intent)
 	{

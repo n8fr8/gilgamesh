@@ -1,10 +1,18 @@
-package info.guardianproject.gilga;
+package info.guardianproject.gilga.service;
+
+import info.guardianproject.gilga.GilgaMeshActivity;
+import info.guardianproject.gilga.R;
+import info.guardianproject.gilga.model.DirectMessage;
+import info.guardianproject.gilga.model.Status;
+import info.guardianproject.gilga.model.StatusAdapter;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import android.app.Notification;
@@ -18,16 +26,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
-import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
-import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
+import android.net.wifi.p2p.WifiP2pManager.DnsSdServiceResponseListener;
+import android.net.wifi.p2p.WifiP2pManager.DnsSdTxtRecordListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -35,7 +44,7 @@ import android.util.Log;
 
 public class GilgaService extends Service {
 
-	private final static String TAG = "GilgaService";
+	public final static String TAG = "GilgaService";
 
 	public final static String ACTION_NEW_MESSAGE = "action_new_message";
 	
@@ -51,16 +60,14 @@ public class GilgaService extends Service {
    private String mLocalShortBluetoothAddress = "";
    private String mLocalAddressHeader = "";
    
-   //for WifiP2P mode
-   WifiP2pManager mWifiManager = null;
-   Channel mWifiChannel = null;
-
    boolean mRepeaterMode = false; //by default RT trusted messages
 
     // String buffer for outgoing messages
     private StringBuffer mOutStringBuffer;
 
     private StatusAdapter mStatusAdapter;
+    
+    private WifiController mWifiController;
     
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -140,18 +147,8 @@ public class GilgaService extends Service {
         mLocalAddressHeader = mLocalShortBluetoothAddress.substring(0,5);
        // mChatService = new BluetoothChatService(this, mHandler);
 
-        mWifiManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-        
-        mWifiChannel = mWifiManager.initialize(this, getMainLooper(), new ChannelListener()
-        {
-
-			@Override
-			public void onChannelDisconnected() {
-				Log.d(TAG,"wifi p2p disconnected");
-			}
-        	
-        });
-        
+        mWifiController = new WifiController();
+        mWifiController.init(this);
         
         IntentFilter filter = new IntentFilter();
         // Register for broadcasts when a device is discovered
@@ -177,112 +174,9 @@ public class GilgaService extends Service {
         mOutStringBuffer = new StringBuffer("");
 
 	}
-    // The BroadcastReceiver that listens for discovered devices and
-    // changes the title when discovery is finished
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
 
-            // When discovery finds a device
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Get the BluetoothDevice object from the Intent
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                
-                if (device.getName() != null)
-                {
-                	String address = device.getAddress();
-                	
-                	processInboundMessage(device.getName(),address,device.getBondState() == BluetoothDevice.BOND_BONDED);
-                	
-                	if (mQueuedDirectMessage.size() > 0 && mDirectChatSession != null
-                			&& (mDirectChatSession.getState() != DirectMessageSession.STATE_CONNECTED 
-                			|| mDirectChatSession.getState() != DirectMessageSession.STATE_CONNECTING))
-                	{
-                		//try to do resend now if address matches
-                		
-                		if (address != null)
-                    	{
-                			synchronized (mQueuedDirectMessage)
-                			{
-	                    		Iterator<DirectMessage> itDm = mQueuedDirectMessage.iterator();
-	                    		while (itDm.hasNext())
-	                    		{
-	                    			DirectMessage dm = itDm.next();
-	                    			
-	                    			if (dm.to.equals(address))
-	                    			{
-	                    		    	boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
-	                    		    	mDirectChatSession.connect(device, isSecure);
-	                    		    	break;
-	                    			}
-	                    		}
-                			}
-                    	}
-                	}
-                	
-                }
-                
-            // When discovery is finished, change the Activity title
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                
-            	mHandler.postDelayed(new Runnable ()
-            	{
-            		public void run ()
-            		{
-                        mBluetoothAdapter.startDiscovery();
-            		}
-            	}, BLUETOOTH_DISCOVERY_RETRY_TIMEOUT);
-            }
-            else if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
-                // Determine if Wifi P2P mode is enabled or not, alert
-                // the Activity.
-                int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
-                if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
-                //	Toast.makeText(GilgaMesh.this, "Wifi P2P enhanced mode activated!", Toast.LENGTH_LONG).show();
-                
-                } 
-                
-            } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
-
-                // The peer list has changed!  We should probably do something about
-                // that.
-                mWifiManager.requestPeers(mWifiChannel, peerListListener);
-
-            } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
-
-                // Connection state changed!  We should probably do something about
-                // that.
-            	   NetworkInfo networkInfo = (NetworkInfo) intent
-                           .getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
-
-                   mWifiManager.requestConnectionInfo(mWifiChannel, new ConnectionInfoListener()
-                   {
-
-					@Override
-					public void onConnectionInfoAvailable(WifiP2pInfo winfo) {
-						
-						
-					}
-                	   
-                   });
-
-            	//Log.d(TAG,"connection changed");
-            	
-            } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
-                
-            	WifiP2pDevice device = (WifiP2pDevice) intent.getParcelableExtra(
-                        WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
-
-            	 boolean trusted = false; //not sure how to do this with wifi
-            	 
-            	 if (!mapToNickname(device.deviceAddress).startsWith(mLocalAddressHeader)) //not me
-           	  		processInboundMessage(device.deviceName,device.deviceAddress,trusted);
-            }
-        }
-    };
     
-    private void processInboundMessage (String name, String address, boolean trusted)
+    public void processInboundMessage (String name, String address, boolean trusted)
     {
     	String messageBuffer = name;
     	
@@ -356,38 +250,7 @@ public class GilgaService extends Service {
     	
     }
     
-    private void setWifiDeviceName (String newDeviceName)
-    {
-    	try
-        {
-    		ActionListener al = new ActionListener ()
-    		{
-
-				@Override
-				public void onFailure(int arg0) {
-			//		Log.d(TAG,"could not set wifi device name: " + arg0);
-				}
-
-				@Override
-				public void onSuccess() {
-					
-				//	Log.d(TAG,"set new device name!");
-					
-				}
-    			
-    		};
-    		
-	        Class c;
-	        c = Class.forName("android.net.wifi.p2p.WifiP2pManager");
-	        Method m = c.getMethod("setDeviceName", new Class[] {Channel.class, String.class, ActionListener.class});
-	        Object o = m.invoke(mWifiManager, new Object[]{mWifiChannel,newDeviceName, al});
-	        
-        }
-        catch (Exception e){
-        	
-        	Log.e(TAG,"error setting wifi name",e);
-        }
-    }
+   
     
     private void startBroadcasting() {
       //  if(D) Log.d(TAG, "ensure discoverable");
@@ -426,7 +289,7 @@ public class GilgaService extends Service {
     	if (!mBluetoothAdapter.isDiscovering())
     		mBluetoothAdapter.startDiscovery();
         
-        startWifiDiscovery ();
+    	mWifiController.startWifiDiscovery ();
        
     }
     
@@ -499,8 +362,8 @@ public class GilgaService extends Service {
         	
         	mBluetoothAdapter.setName(mOutStringBuffer.toString());
         	
-        	setWifiDeviceName(' ' + message);
         	
+        	mWifiController.updateWifiStatus(message);
     		startBroadcasting() ;
             
             
@@ -508,51 +371,9 @@ public class GilgaService extends Service {
     }
   
     
-    private void startWifiDiscovery ()
-    {
-    	
-    	 mWifiManager.discoverPeers(mWifiChannel, new WifiP2pManager.ActionListener() {
-
-             @Override
-             public void onSuccess() {
-                 // Code for when the discovery initiation is successful goes here.
-                 // No services have actually been discovered yet, so this method
-                 // can often be left blank.  Code for peer discovery goes in the
-                 // onReceive method, detailed below.
-             	Log.d(TAG,"success on wifi discover");
-             	//startWifiDiscovery();
-             }
-
-             @Override
-             public void onFailure(int reasonCode) {
-                 // Code for when the discovery initiation fails goes here.
-                 // Alert the user that something went wrong.
-             	Log.d(TAG,"FAIL on wifi discovery: " + reasonCode);
-             }
-
-    	    });
-    }
     
-    private PeerListListener peerListListener = new PeerListListener() {
-        @Override
-        public void onPeersAvailable(WifiP2pDeviceList peerList) {
 
-          Collection<WifiP2pDevice> deviceList = peerList.getDeviceList();
-
-          for (WifiP2pDevice device : deviceList)
-          {
-        	  boolean trusted = false; //not sure how to do this with wifi
-        	  
-         	 if (!mapToNickname(device.deviceAddress).startsWith(mLocalAddressHeader)) //not me
-        		  processInboundMessage(device.deviceName,device.deviceAddress,trusted);
-        	  
-        	  
-        	  
-          }
-        }
-    };
-
-
+   
     
     public static String mapToNickname (String hexAddress)
     {
@@ -716,6 +537,95 @@ public class GilgaService extends Service {
     	mNotifyMgr.notify(mNotificationId, builder.getNotification());
     }
     
+    // The BroadcastReceiver that listens for discovered devices and
+    // changes the title when discovery is finished
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    	
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            // When discovery finds a device
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // Get the BluetoothDevice object from the Intent
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                
+                if (device.getName() != null)
+                {
+                	String address = device.getAddress();
+                	
+                	processInboundMessage(device.getName(),address,device.getBondState() == BluetoothDevice.BOND_BONDED);
+                	
+                	if (mQueuedDirectMessage.size() > 0 && mDirectChatSession != null
+                			&& (mDirectChatSession.getState() != DirectMessageSession.STATE_CONNECTED 
+                			|| mDirectChatSession.getState() != DirectMessageSession.STATE_CONNECTING))
+                	{
+                		//try to do resend now if address matches
+                		
+                		if (address != null)
+                    	{
+                			synchronized (mQueuedDirectMessage)
+                			{
+	                    		Iterator<DirectMessage> itDm = mQueuedDirectMessage.iterator();
+	                    		while (itDm.hasNext())
+	                    		{
+	                    			DirectMessage dm = itDm.next();
+	                    			
+	                    			if (dm.to.equals(address))
+	                    			{
+	                    		    	boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
+	                    		    	mDirectChatSession.connect(device, isSecure);
+	                    		    	break;
+	                    			}
+	                    		}
+                			}
+                    	}
+                	}
+                	
+                }
+                
+            // When discovery is finished, change the Activity title
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                
+            	mHandler.postDelayed(new Runnable ()
+            	{
+            		public void run ()
+            		{
+                        mBluetoothAdapter.startDiscovery();
+            		}
+            	}, BLUETOOTH_DISCOVERY_RETRY_TIMEOUT);
+            }
+            else if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
+                // Determine if Wifi P2P mode is enabled or not, alert
+                // the Activity.
+                int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
+                if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
+                
+                	mWifiController.setEnabled(true);
+                } 
+                
+            } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
+
+            	mWifiController.requestPeers();
+            	
+                
+
+            } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
+
+            	mWifiController.getNetworkInfo ();
+            	
+            } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
+                
+            	WifiP2pDevice device = (WifiP2pDevice) intent.getParcelableExtra(
+                        WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+
+            	 boolean trusted = false; //not sure how to do this with wifi
+            	 
+            	 if (!mapToNickname(device.deviceAddress).startsWith(mLocalAddressHeader)) //not me
+           	  		processInboundMessage(device.deviceName,device.deviceAddress,trusted);
+            }
+        }
+    };
 
     // Message types sent from the BluetoothChatService Handler
     public static final int MESSAGE_STATE_CHANGE = 1;

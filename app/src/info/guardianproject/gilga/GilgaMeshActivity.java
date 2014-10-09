@@ -16,6 +16,11 @@
 
 package info.guardianproject.gilga;
 
+import info.guardianproject.gilga.model.DirectMessage;
+import info.guardianproject.gilga.model.Status;
+import info.guardianproject.gilga.model.StatusAdapter;
+import info.guardianproject.gilga.service.GilgaService;
+
 import java.io.File;
 import java.util.ArrayList;
 
