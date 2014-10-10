@@ -6,6 +6,7 @@ import info.guardianproject.gilga.model.DirectMessage;
 import info.guardianproject.gilga.model.Status;
 import info.guardianproject.gilga.model.StatusAdapter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -27,6 +28,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 
 public class GilgaService extends Service {
@@ -59,6 +61,8 @@ public class GilgaService extends Service {
     private WifiController mWifiController;
     
     private Thread mBluetoothListener = null;
+    
+    private IRCRepeater mIRCRepeater = null;
     
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -96,6 +100,16 @@ public class GilgaService extends Service {
 			if (intent.hasExtra("repeat"))
 			{
 				mRepeaterMode = intent.getBooleanExtra("repeat", false);
+				
+				if (mRepeaterMode)
+				{
+					mIRCRepeater = new IRCRepeater("n8fr8test","gilgamesh");
+				}
+				else 
+				{
+					if (mIRCRepeater != null)
+						mIRCRepeater.shutdown();
+				}
 			}
 		}
 		
@@ -268,6 +282,15 @@ public class GilgaService extends Service {
             			String rtMessage = "RPT @" + mapToNickname(status.from) + ": " + status.body;
             			updateStatus(rtMessage); //retweet!
 
+            			try
+            			{
+            				mIRCRepeater.sendMessage(rtMessage);
+            			}
+            			catch (IOException e)
+            			{
+            				Log.e(TAG,"error repeating to IRC",e);
+            			}
+            			
             			Status statusMe = new Status();
                         statusMe.from = getString(R.string.me_);
                         statusMe.ts = status.ts;
