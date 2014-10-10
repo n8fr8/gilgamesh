@@ -40,7 +40,7 @@ public class GilgaService extends Service {
     private Handler mTimerHandler = new Handler();
     private final static int BLUETOOTH_DISCOVERY_RETRY_TIMEOUT = 12000;
     
-    public final static String MATCH_DIRECT_MESSAGE = "^(d |dm |pm ).*$";
+    public final static String MATCH_DIRECT_MESSAGE = "(?i)^(d |dm |pm ).*$";
     
     // Local Bluetooth adapter
    private BluetoothAdapter mBluetoothAdapter = null;
