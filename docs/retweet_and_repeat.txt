@@ -1,0 +1,25 @@
+The Difference between Repeat (RPT) and Retweet (RT) on a Mobile (sorta)Mesh
+http://openideals.com/2014/10/09/the-difference-between-repeat-rpt-and-retweet-rt-on-a-mobile-sortamesh/
+
+There are two behaviors I have been considering during my adventures in human-powered mobile mesh these last few weeks. The first is Retweet or Reshare, as invented by Twitter users manually (“RT @foo this is important”) and then later on built directly into the Twitter platform as a feature. The second is “Repeat”, as inspired by radio repeaters.
+
+Retweet (RT) is meant as a human-powered endorsement of a message. The meaning and content of the messages have been ideally verified, or at least the source is trusted.
+
+Repeat (RPT) is meant to allow a message to extend further in its reach, by allowing the receives device to reshare it another 10 to 100 meters from its current and future positions. It is an active way to participate in extending the mesh, but it should not be seen as endorsement of fact or an act of verification or trust.
+
+A mixture of retweeters and repeaters in a crowd, can then extend the reach of a message from 10m or 100m up to say, 400m in the drawing below. A repeater might be a fixed device, say a phone or tablet with a good solid antenna plugged into a battery pack or an outlet somewhere.
+
+Diagram1
+
+ 
+
+A retweeter is more likely a person in the crowd, moving through the area in a variety of directions. As they continue moving however, they will keep rebroadcasting their last few tweets, including the retweet. As they encounter new receivers / lurkers, they will receive the original message, and the mesh is now extended in a non contiguous-manner.
+
+Diagram2
+
+The Gilgamesh app supports a simple two-tap feature to manually reshare any status message you have received. Once this is done, your device then rebroadcasts the message over its Bluetooth and Wifi radios, with the expected “RT @900734 i am live on air” format. Also, remember beyond this particular app, any user can manually set their Bluetooth device name, be it a laptop or an iPad, to use a similar format. The app also now supports an automatic repeater mode, that can be easily toggled off and on. In this mode, *ANY* message you receive is automatically rebroadcast, using the “RPT @900734 does the repeater hear me” syntax. You can see this in the screenshot below.
+device-2014-10-06-165429  device-2014-10-09-120044
+
+Ultimately, because we are limiting this experiment to a very simple plaintext status messaging system, we have made our lives very easy, and made the possibilities of successful use quite good. Since we aren’t concerned with routing internet protocol or creating a reliable LAN network that can sustain HTTP, we can take advantage of ideas like non-contiguous meshes, retweeting and repeating to extend the range, reach and impact of the communications.
+
+In the screenshot, you might have also seen the use of direct messages with delivery confirmations. I will cover that in a future post, as it is another complex and fascinating topic of possibilities!
