@@ -3,17 +3,22 @@
     <item
         android:id="@+id/item_reshare"
         android:showAsAction="ifRoom|withText"
-        android:title="Reshare"
+        android:title="@string/menu_reshare"
         android:visible="true"/>
     <item
-        android:id="@+id/item_copy"
+        android:id="@+id/item_reply"
         android:showAsAction="ifRoom|withText"
-        android:title="Copy"
+        android:title="@string/menu_reply"
         android:visible="true"/>
     <item
         android:id="@+id/item_direct_message"
         android:showAsAction="ifRoom|withText"
-        android:title="Direct Message"
+        android:title="@string/menu_dm"
         android:visible="true"/>
-
+    <item
+        android:id="@+id/item_copy"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/menu_copy"
+        android:visible="true"/>
+    
 </menu>

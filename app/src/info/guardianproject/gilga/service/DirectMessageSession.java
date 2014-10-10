@@ -45,7 +45,7 @@ public class DirectMessageSession {
     private static final String TAG = "BluetoothChatService";
     private static final boolean D = true;
 
-    // Name for the SDP record when creating server socket
+    // Name for the SDP record when creating server socket"
     private static final String NAME_SECURE = "GilgaMeshSecure";
     private static final String NAME_INSECURE = "GilgaMeshInsecure";
 
@@ -331,7 +331,7 @@ public class DirectMessageSession {
                     // successful connection or an exception
                     socket = mmServerSocket.accept();
                 } catch (IOException e) {
-                    Log.e(TAG, "Socket Type: " + mSocketType + "accept() failed", e);
+                    Log.w(TAG, "Socket Type: " + mSocketType + "accept() failed", e);
                     break;
                 }
 

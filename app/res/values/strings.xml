@@ -35,7 +35,7 @@
     <string name="button_scan">Scan for devices</string>
 
     <!-- Options Menu -->
-    <string name="connect">Direct Message</string>
+    <string name="connect">Private Message</string>
     <string name="discoverable">Make discoverable</string>
     <string name="connected_to_">"Connected to "</string>
     <string name="me_">"Me:  "</string>
@@ -52,4 +52,17 @@
     <string name="shutdown_app">Shutdown</string>
     <string name="toggle_repeater">Toggle Repeater</string>
     <string name="repeater_enabled">REPEATER ENABLED</string>
+    
+    <string name="menu_reshare">Reshare</string>
+    <string name="menu_reply">Reply</string>
+    <string name="menu_dm">Private Message</string>
+    <string name="menu_copy">Copy</string>
+    <string name="_pm_to_">">> PM TO: "</string>
+    <string name="_pm_from_">"&lt;&lt; PM FROM: "</string>
+    <string name="_seconds_ago">" seconds ago"</string>
+    <string name="_minutes_ago">" minutes ago"</string>
+    <string name="_hours_ago">" hours ago"</string>
+    <string name="you_can_t_send_private_messages_to_yourself">You can\'t send private messages to yourself</string>
+    <string name="error_sending_message_">"Error sending message: "</string>
+    
 </resources>

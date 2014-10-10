@@ -87,7 +87,7 @@ public class StatusAdapter extends BaseAdapter
 			    	 to = GilgaService.mapToNickname(to);	 
 			    }
 			    
-		    	to = ">> DM TO: " + to;
+		    	to = mContext.getString(R.string._pm_to_) + to;
 		    	
 		    	if (dm.delivered)
 		    		to+=" \u2713";
@@ -106,7 +106,7 @@ public class StatusAdapter extends BaseAdapter
 			    	 from = GilgaService.mapToNickname(from);	 
 			    }
 			    
-		    	from = "<< DM FROM: " + from;
+		    	from = mContext.getString(R.string._pm_from_) + from;
 		    	
 		    	if (dm.delivered)
 		    		from+=" \u2713";
@@ -139,16 +139,16 @@ public class StatusAdapter extends BaseAdapter
 	    
 	    long timeAgo = (new java.util.Date().getTime() - status.ts)/1000;
 	    if (timeAgo < 60)
-	    	txtTime.setText(timeAgo + " seconds ago");
+	    	txtTime.setText(timeAgo + mContext.getString(R.string._seconds_ago));
 	    else if (timeAgo < 3600)
 	    {
 	    	timeAgo = timeAgo / 60;
-	    	txtTime.setText(timeAgo + " minutes ago");
+	    	txtTime.setText(timeAgo +  mContext.getString(R.string._minutes_ago));
 	    }
 	    else
 	    {
 	    	timeAgo = timeAgo / 3600;
-	    	txtTime.setText(timeAgo + " hours ago");
+	    	txtTime.setText(timeAgo +  mContext.getString(R.string._hours_ago));
 	    }
 	    
 	    return v;

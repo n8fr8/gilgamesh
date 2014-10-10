@@ -177,9 +177,16 @@ public class GilgaMeshActivity extends Activity {
 
 							
 							return true;
+						case R.id.item_reply:
+							
+							String reply = "@" + GilgaService.mapToNickname(status.from) + " ";
+					    	mOutEditText.setText(reply);
+					    	mOutEditText.setSelection(reply.length());
+
+							return true;
 						case R.id.item_direct_message:
 							
-							String dm = "dm " + status.from + " ";
+							String dm = "pm " + status.from + " ";
 					    	mOutEditText.setText(dm);
 					    	mOutEditText.setSelection(dm.length());
 
@@ -248,7 +255,7 @@ public class GilgaMeshActivity extends Activity {
         intent.putExtra("status", message);
         startService(intent);
 
-        if (!message.matches("^(d |dm ).*$")) //if not a direct message
+        if (!message.matches(GilgaService.MATCH_DIRECT_MESSAGE)) //if not a direct message
         {
         	Status statusMe = new Status();
             statusMe.from = getString(R.string.me_);

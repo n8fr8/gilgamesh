@@ -6,13 +6,9 @@ import info.guardianproject.gilga.model.DirectMessage;
 import info.guardianproject.gilga.model.Status;
 import info.guardianproject.gilga.model.StatusAdapter;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 import android.app.Notification;
@@ -27,20 +23,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.wifi.p2p.WifiP2pDevice;
-import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.WifiP2pManager.ActionListener;
-import android.net.wifi.p2p.WifiP2pManager.Channel;
-import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
-import android.net.wifi.p2p.WifiP2pManager.DnsSdServiceResponseListener;
-import android.net.wifi.p2p.WifiP2pManager.DnsSdTxtRecordListener;
-import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
-import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
-import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Log;
+import android.widget.Toast;
 
 public class GilgaService extends Service {
 
@@ -51,7 +38,9 @@ public class GilgaService extends Service {
     private static Hashtable<String,Status> mMessageLog = null;
     
     private Handler mTimerHandler = new Handler();
-    private final static int BLUETOOTH_DISCOVERY_RETRY_TIMEOUT = 3000;
+    private final static int BLUETOOTH_DISCOVERY_RETRY_TIMEOUT = 12000;
+    
+    public final static String MATCH_DIRECT_MESSAGE = "^(?!d |dm |pm ).*$";
     
     // Local Bluetooth adapter
    private BluetoothAdapter mBluetoothAdapter = null;
@@ -68,6 +57,8 @@ public class GilgaService extends Service {
     private StatusAdapter mStatusAdapter;
     
     private WifiController mWifiController;
+    
+    private Thread mBluetoothListener = null;
     
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -93,7 +84,7 @@ public class GilgaService extends Service {
 			{
 				String status = intent.getStringExtra("status");
 				
-				if (status.matches("^(d |dm ).*$"))
+				if (status.matches(MATCH_DIRECT_MESSAGE))
 				{
 					sendDirectMessage (status);
 				}
@@ -127,7 +118,10 @@ public class GilgaService extends Service {
         
         // Make sure we're not doing discovery anymore
         if (mBluetoothAdapter != null && mBluetoothAdapter.isDiscovering())
-        	mBluetoothAdapter.cancelDiscovery();
+        {
+        	mBluetoothAdapter.cancelDiscovery();      
+        	mBluetoothAdapter = null;
+        }
         
         mWifiController.stopWifi();
         
@@ -216,8 +210,27 @@ public class GilgaService extends Service {
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
 
+        mHandler.postDelayed(mBluetoothChecker, BLUETOOTH_DISCOVERY_RETRY_TIMEOUT);
 	}
 
+	private Runnable mBluetoothChecker = new Runnable ()
+	{
+		public void run ()
+    	{
+    		if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled())
+    		{     
+    			try
+    			{
+	            	if (!mBluetoothAdapter.isDiscovering())
+	            		mBluetoothAdapter.startDiscovery();
+            		          
+	            }
+            	catch (Exception e){}
+    		}
+    		
+    		mHandler.postDelayed(mBluetoothChecker, BLUETOOTH_DISCOVERY_RETRY_TIMEOUT);
+    	}
+	};
     
     public void processInboundMessage (String name, String address, boolean trusted)
     {
@@ -230,7 +243,11 @@ public class GilgaService extends Service {
     	
     		String message = st.nextToken();
     		
-        	if (message.startsWith("#")||message.startsWith("!")||message.startsWith("@")||message.startsWith(" "))
+        	if (message.startsWith("#")||
+        			message.startsWith("!")||
+        			message.startsWith("@")||
+        			message.startsWith(".")||
+        			message.startsWith(" "))
         	{
         		message = message.trim();
         		
@@ -353,42 +370,57 @@ public class GilgaService extends Service {
     	String cmd = st.nextToken();
     	String address = st.nextToken();
     	
-    	StringBuffer dMessage = new StringBuffer();
+    	if (address.equals(mLocalShortBluetoothAddress)
+    			|| address.equals(mBluetoothAdapter.getAddress()))
+    			{
+    		//can't send DM's to yourself
+    		Toast.makeText(this, R.string.you_can_t_send_private_messages_to_yourself, Toast.LENGTH_SHORT).show();
+    		return;
+    			}
     	
-    	while (st.hasMoreTokens())
-    		dMessage.append(st.nextToken()).append(" ");
-    	
-    	DirectMessage dm = new DirectMessage();
-    	dm.to = address;
-    	dm.body = dMessage.toString().trim();
-    	dm.ts = new java.util.Date().getTime();
-    	dm.delivered = false;
-
-    	mQueuedDirectMessage.add(dm);
-    	
-    	final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-    	final boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
-    	
-    	dm.trusted = isSecure;
-    	mStatusAdapter.add(dm);
-    	
-    	if (mDirectChatSession == null)
+    	try
     	{
-    	 mDirectChatSession = new DirectMessageSession(this, mHandler);
-  	   	 mDirectChatSession.start();
+	    	final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+	    	final boolean isSecure = device.getBondState()==BluetoothDevice.BOND_BONDED;
+	    	
+	    	StringBuffer dMessage = new StringBuffer();
+	    	
+	    	while (st.hasMoreTokens())
+	    		dMessage.append(st.nextToken()).append(" ");
+	    	
+	    	DirectMessage dm = new DirectMessage();
+	    	dm.to = address;
+	    	dm.body = dMessage.toString().trim();
+	    	dm.ts = new java.util.Date().getTime();
+	    	dm.delivered = false;
+	
+	    	mQueuedDirectMessage.add(dm);
+	    	
+	    	dm.trusted = isSecure;
+	    	mStatusAdapter.add(dm);
+	    	
+	    	if (mDirectChatSession == null)
+	    	{
+	    	 mDirectChatSession = new DirectMessageSession(this, mHandler);
+	  	   	 mDirectChatSession.start();
+	    	}
+	    	else
+	    	{
+	    		mDirectChatSession.disconnect();
+	    	}
+	    	
+	    	mHandler.postAtTime(new Runnable ()
+	    	{
+	    		public void run ()
+	    		{
+	    	    	mDirectChatSession.connect(device, isSecure);
+	    		}
+	    	}, 2000);
     	}
-    	else
+    	catch (IllegalArgumentException iae)
     	{
-    		mDirectChatSession.disconnect();
+    		Toast.makeText(this, getString(R.string.error_sending_message_) + iae.getLocalizedMessage(), Toast.LENGTH_LONG).show();
     	}
-    	
-    	mHandler.postAtTime(new Runnable ()
-    	{
-    		public void run ()
-    		{
-    	    	mDirectChatSession.connect(device, isSecure);
-    		}
-    	}, 2000);
     	
     }
     
@@ -412,7 +444,6 @@ public class GilgaService extends Service {
         	
         	mBluetoothAdapter.setName(mOutStringBuffer.toString());
         	
-        	
         	mWifiController.updateWifiStatus(message);
     		startBroadcasting() ;
             
@@ -425,12 +456,17 @@ public class GilgaService extends Service {
 
    
     
-    public static String mapToNickname (String hexAddress)
+    public static String mapToNickname (String hexAddressIn)
     {
-    	//remove : and get last 6 characters
-    	hexAddress = hexAddress.replace(":", "");
-    	hexAddress = hexAddress.substring(hexAddress.length()-6,hexAddress.length());
-    	return hexAddress.toUpperCase();
+    	String shortAddress = new String(hexAddressIn);
+    	if (shortAddress.length() > 6)
+    	{
+	    	//remove : and get last 6 characters
+    		shortAddress = shortAddress.replace(":", "");
+    		shortAddress = shortAddress.substring(shortAddress.length()-6,shortAddress.length());	   
+    	}
+    	
+    	return shortAddress.toUpperCase();
     }
     
     public String MD5(String md5) {
@@ -529,7 +565,7 @@ public class GilgaService extends Service {
 	                dm.trusted = true;
 	                dm.ts = new java.util.Date().getTime();
 	                
-	                sendNotitication("DM FROM: " + addr, dm.body);
+	                sendNotitication(getString(R.string._pm_from_) + addr, dm.body);
 	                
 	                mStatusAdapter.add(dm);
                 }

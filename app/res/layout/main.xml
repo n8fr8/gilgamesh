@@ -42,6 +42,8 @@
             android:layout_weight="1"
             android:layout_gravity="bottom"
             android:hint="post status update..."
+                android:inputType="textShortMessage|textAutoCorrect|textCapSentences|textMultiLine|textImeMultiLine"
+            android:imeOptions="actionSend|flagNoEnterAction"
         />
         <ImageButton android:id="@+id/button_send"
             android:layout_width="wrap_content"
