@@ -51,8 +51,12 @@ public class GilgaService extends Service {
    private String mLocalShortBluetoothAddress = "";
    private String mLocalAddressHeader = "";
    
-   boolean mRepeaterMode = false; //by default RT trusted messages
-
+    boolean mRepeaterMode = false; //by default RT trusted messages
+    boolean mRepeatToIRC = false; //need to add more options here
+    
+    private IRCRepeater mIRCRepeater = null;
+    private final static String DEFAULT_IRC_CHANNEL = "#gilgamesh";
+    
     // String buffer for outgoing messages
     private StringBuffer mOutStringBuffer;
 
@@ -60,17 +64,11 @@ public class GilgaService extends Service {
     
     private WifiController mWifiController;
     
-    private Thread mBluetoothListener = null;
-    
-    private IRCRepeater mIRCRepeater = null;
-    
 	@Override
 	public IBinder onBind(Intent arg0) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	
 	
 	@Override
 	public void onCreate() {
@@ -101,9 +99,9 @@ public class GilgaService extends Service {
 			{
 				mRepeaterMode = intent.getBooleanExtra("repeat", false);
 				
-				if (mRepeaterMode)
+				if (mRepeaterMode && mRepeatToIRC)
 				{
-					mIRCRepeater = new IRCRepeater("n8fr8test","gilgamesh");
+					mIRCRepeater = new IRCRepeater(mLocalShortBluetoothAddress,DEFAULT_IRC_CHANNEL);
 				}
 				else 
 				{
@@ -473,11 +471,6 @@ public class GilgaService extends Service {
             
         }
     }
-  
-    
-    
-
-   
     
     public static String mapToNickname (String hexAddressIn)
     {
