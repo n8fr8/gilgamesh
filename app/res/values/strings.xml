@@ -39,7 +39,8 @@
     <string name="discoverable">Make discoverable</string>
     <string name="connected_to_">"Connected to "</string>
     <string name="me_">"Me:  "</string>
-    <string name="broadcast_mode_public_">Broadcast (Public)</string>
+    <string name="listen_mode">You are in listening only mode</string>
+    <string name="broadcast_mode_public_">You are broadcasting as </string>
     <string name="_private_">(private)</string>
     <string name="you_are_">"You are: "</string>
     

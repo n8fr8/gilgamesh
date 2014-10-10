@@ -77,6 +77,8 @@ public class GilgaMeshActivity extends Activity {
     private static final int REQUEST_ENABLE_BT = 3;
 
     private boolean mRepeaterMode = false;
+
+    private String mLocalAddress = null;
     
     // Layout Views
     private ListView mConversationView;
@@ -111,10 +113,18 @@ public class GilgaMeshActivity extends Activity {
         } 
         else
         {
-            setStatus(getString(R.string.broadcast_mode_public_) 
-            		+ " | " + getString(R.string.you_are_)
-            		+ GilgaService.mapToNickname(bluetoothAdapter.getAddress()));
-            
+        	mLocalAddress = GilgaService.mapToNickname(bluetoothAdapter.getAddress());
+
+        	if (bluetoothAdapter.getScanMode() ==
+        	          BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {        		
+        	
+                setStatus(getString(R.string.broadcast_mode_public_) 
+                		+ " @"	+ mLocalAddress);
+        	}
+        	else    
+        		setStatus(getString(R.string.listen_mode));
+        	
+       
             Intent intent = new Intent(this, GilgaService.class);
             intent.putExtra("listen", true);
             startService(intent);
@@ -267,6 +277,10 @@ public class GilgaMeshActivity extends Activity {
         
         }
         
+        setStatus(getString(R.string.broadcast_mode_public_) 
+        		+ " @"	+ mLocalAddress);
+
+        
         mOutEditText.setText("");
     }
 
@@ -288,7 +302,10 @@ public class GilgaMeshActivity extends Activity {
         statusMe.trusted = status.trusted;
         statusMe.body = msgRT;
         StatusAdapter.getInstance(GilgaMeshActivity.this).add(statusMe);
-	        
+        
+        setStatus(getString(R.string.broadcast_mode_public_) 
+        		+ " @"	+ mLocalAddress);
+        
 			
     }
     
@@ -314,11 +331,21 @@ public class GilgaMeshActivity extends Activity {
         	{
                 BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        		 setStatus(getString(R.string.broadcast_mode_public_) 
-                 		+ " | " + getString(R.string.you_are_)
-                 		+ GilgaService.mapToNickname(bluetoothAdapter.getAddress()));
-        		 
-                 startService(new Intent(this, GilgaService.class));
+                mLocalAddress = GilgaService.mapToNickname(bluetoothAdapter.getAddress());
+
+            	if (bluetoothAdapter.getScanMode() ==
+            	          BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {        		
+            	
+                    setStatus(getString(R.string.broadcast_mode_public_) 
+                    		+ " @"	+ mLocalAddress);
+            	}
+            	else    
+            		setStatus(getString(R.string.listen_mode));
+            	
+           
+                Intent intent = new Intent(this, GilgaService.class);
+                intent.putExtra("listen", true);
+                startService(intent);
 
         	}
         	
