@@ -1,0 +1,58 @@
+
+// cfb2aed 0.0.7
+b277de6 turn IRCRepeater off for now until we build pref UI
+006b13d add in ability for repeater to repeat to IRC, if it can get internet
+6fbaae8 add in BluetoothLE support soon!
+ccee9b7 improve listening vs broadcast logic and display
+a660061 add case insensitive matching to PM/DM string
+46436d8 fix PM match string
+4b2bf9b clean up direct messaging logic fixes #14 also adds reply option in menu changes "DM" to "PM" or "private message"
+54b6803 add in repeater mode option RPT != RT :)
+
+//9b9f1ca update to 0.0.6 notifications!
+238c0fb add foreground notify and clean shutdown menu options
+e52a6d2 add code for clearing/resetting DNS name and for shutting down
+96f3040 code refactor into logical packages also includes an apparent fix for wifi DNS service
+5d7e9db add vibrate permission to manifest
+469dc63 add notification/vibrate on DM receive
+
+// 0e2d243 update to 0.0.5
+edb0b10 fixes for directmessage support - ensure adapter is notified of delivery state change - manage connect, disconnect, send threa
+2274ea7 small changes to status layout
+286fbe4 remove message type since we are using subclasses instead
+6f0e1de fixes #13 properly launch activity from server
+2e74db4 DM's can't be reshared
+
+// 059b47f bump to 0.0.4
+5f68ceb updating directmessage logic and add delivery confirmation checkmark
+e1fd375 allow for message to be received fully in the background by the service
+
+// fe88078 update to 0.0.3
+e4185d7 make sure DM color is reset, and a newline is added
+18c0151 major refactoring (a Service!) and UI update
+be11b52 turn repeater mode off by default also don't limit shareAPK to bluetooth only
+79713fa move chatwindow setup to onCreate() so it doesn't get reset
+8e9025a enable share to be over bluetooth only (to simplify things)
+7d04501 remove unnecessary toast
+8962e73 improve autoRT mode, so that it doesn't loop spam everyone
+7fae42a updated manifest version number
+d4c6f85 only start rfcomm socket if you are broadcasting it is not needed if you are just a lurker -also add autoretweet feature for p
+40701de if bluetooth is off, turn it on w/o requiring discovery
+8a8848a Added support for WifiDirect aka WifiP2pManager API We can use WifiDirect in the same way we use Bluetooth, by changing the de
+7d32fb6 Merge branch 'master' of https://github.com/akwizgran/gilgamesh into akwizgran-master
+887fd5d only become discoverable once you send a message - this allows people to just read/consume without broadcasting - also improve
+9c5a648 Use a single prompt to enable Bluetooth and discoverability.
+09047be Removed an unused variable.
+c50d3c1 Removed unused imports.
+eaa1c0d Update README.md
+baa60e6 adding in screenshots
+db547f9 updating the title
+1f8f30c updated readme
+0aad7e8 add easy retweet by long pressing on message
+4db55aa updated info on the app design
+c2c5b9e add multi-message buffer to help reduce missed messages - also, startDiscovery() inside of setupChat() so it happens after blu
+9018fc9 rename to Gilgamesh
+dc30dcf use secure comm socket if device is paired - also add support for sharing of app APK directly
+f275324 adding in first code
+78b9700 Initial commit
+
