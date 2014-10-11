@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name">Gilgamesh</string>
+
+    <!--  BluetoothChat -->
+    <string name="send">Invia</string>
+    <string name="not_connected">Non sei connesso ad un dispositivo</string>
+    <string name="bt_not_enabled_leaving">Il Bluetooth non è abilitato. Uscita dalla Chat Bluetooth.</string>
+    <string name="title_connecting">connessione...</string>
+    <string name="title_connected_to">connesso a <xliff:g id="device_name">%1$s</xliff:g></string>
+    <string name="title_not_connected">non connesso</string>
+
+    <!--  DeviceListActivity -->
+    <string name="scanning">scansione per dispositivi...</string>
+    <string name="select_device">seleziona un dispositivo a cui connettersi</string>
+    <string name="none_paired">Nessun dispositivo accoppiato</string>
+    <string name="none_found">Nessun dispositivo trovato</string>
+    <string name="title_paired_devices">Dispositivi Accoppiati</string>
+    <string name="title_other_devices">Altri Dispositivi Disponibili</string>
+    <string name="button_scan">Scansione per dispositivi</string>
+
+    <!-- Options Menu -->
+    <string name="connect">Messaggio Privato</string>
+    <string name="discoverable">Rendi visibile</string>
+    <string name="connected_to_">"Connesso a "</string>
+    <string name="me_">"Me:  "</string>
+    <string name="listen_mode">Sei in modalità solo ascolto</string>
+    <string name="broadcast_mode_public_">Sei in broadcast come </string>
+    <string name="_private_">(privato)</string>
+    <string name="you_are_">"Tu sei: "</string>
+    
+    <string name="share_app">Condividi App</string>
+    
+    <string name="please_enable_bluetooth_to_use_this_app">Per favore abilita il Bluetooth per usare quest\'app</string>
+    
+    <string name="_is_running">" è in esecuzione"</string>
+    
+    <string name="shutdown_app">Spegni</string>
+    <string name="toggle_repeater">Alterna Ripetitore</string>
+    <string name="repeater_enabled">RIPETITORE ABILITATO</string>
+    
+    <string name="menu_reshare">Ri-condividi</string>
+    <string name="menu_reply">Rispondi</string>
+    <string name="menu_dm">Messaggio privato</string>
+    <string name="menu_copy">Copia</string>
+    <string name="_pm_to_">">> MP a: "</string>
+    <string name="_pm_from_">"&lt;&lt; MP da: "</string>
+    <string name="_seconds_ago">" secondi fa"</string>
+    <string name="_minutes_ago">" minuti fa"</string>
+    <string name="_hours_ago">" ore fa"</string>
+    <string name="you_can_t_send_private_messages_to_yourself">Non puoi inviarti messaggi privati da solo</string>
+    <string name="error_sending_message_">"Errore inviando il messaggio: "</string>
+    
+</resources>
