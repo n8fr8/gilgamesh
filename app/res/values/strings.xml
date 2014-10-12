@@ -54,6 +54,8 @@
     <string name="toggle_repeater">Toggle Repeater</string>
     <string name="repeater_enabled">REPEATER ENABLED</string>
     
+    <string name="toggle_visibility">Toggle Broadcast</string>
+    
     <string name="menu_reshare">Reshare</string>
     <string name="menu_reply">Reply</string>
     <string name="menu_dm">Private Message</string>

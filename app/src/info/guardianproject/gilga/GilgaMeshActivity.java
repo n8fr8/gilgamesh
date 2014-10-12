@@ -22,35 +22,30 @@ import info.guardianproject.gilga.model.StatusAdapter;
 import info.guardianproject.gilga.service.GilgaService;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -85,6 +80,8 @@ public class GilgaMeshActivity extends Activity {
     private EditText mOutEditText;
     private ImageButton mSendButton;
 
+    private Handler mHandler = new Handler(); //for posting delayed events
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -257,17 +254,17 @@ public class GilgaMeshActivity extends Activity {
     };
     
     
-    private void updateStatus (String message)
+    private void updateStatus (String status)
     {
     	//add message to queue for service to process TODO
 
         Intent intent = new Intent(this, GilgaService.class);
-        intent.putExtra("status", message);
+        intent.putExtra("status", status);
         startService(intent);
 
-        setStatus(getString(R.string.broadcast_mode_public_) 
-        		+ " @"	+ mLocalAddress);
-
+        if (!status.matches(GilgaService.MATCH_DIRECT_MESSAGE))
+	        setStatus(getString(R.string.broadcast_mode_public_) 
+	        		+ " @"	+ mLocalAddress);
         
         mOutEditText.setText("");
     }
@@ -387,11 +384,49 @@ public class GilgaMeshActivity extends Activity {
         case R.id.shutdown_app:
         	shutdown();
         	break;
+        case R.id.toggle_visibility:
+        	toggleVisibility();
+        	break;
         case R.id.toggle_repeater:
         	toggleRepeater();        	
         	break;
         }
         return false;
+    }
+    
+    private void toggleVisibility ()
+    {
+        final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+    	if (bluetoothAdapter.getScanMode() !=
+    	          BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+    	        	
+    	            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+    	            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 3600);
+    	            startActivity(discoverableIntent);
+    	            
+    	        }
+    	else
+    	{
+    		  Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+	            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 1);
+	            startActivity(discoverableIntent);
+    	}
+    	
+    	mHandler.postDelayed(new Runnable ()
+    	{
+    		public void run ()
+    		{
+		    	if (bluetoothAdapter.getScanMode() ==
+		  	          BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {        		
+		  	
+		          setStatus(getString(R.string.broadcast_mode_public_) 
+		          		+ " @"	+ mLocalAddress);
+			  	}
+			  	else    
+			  		setStatus(getString(R.string.listen_mode));
+    		}
+    	},5000);
     }
     
     private void toggleRepeater ()
