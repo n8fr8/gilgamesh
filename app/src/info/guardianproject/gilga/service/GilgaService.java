@@ -38,33 +38,35 @@ public class GilgaService extends Service {
 	public final static String TAG = "GilgaService";
 
 	public final static String ACTION_NEW_MESSAGE = "action_new_message";
-	
-    private static Hashtable<String,Status> mMessageLog = null;
-    
-    private Handler mTimerHandler = new Handler();
-    private final static int BLUETOOTH_DISCOVERY_RETRY_TIMEOUT = 12000;
-    
     public final static String MATCH_DIRECT_MESSAGE = "(?i)^(d |dm |pm ).*$";
     
-    // Local Bluetooth adapter
-   private BluetoothAdapter mBluetoothAdapter = null;
-   
+ // Local Bluetooth adapter
+    private BluetoothAdapter mBluetoothAdapter = null;
+    private final static int BLUETOOTH_DISCOVERY_RETRY_TIMEOUT = 12000;
+    
    //Local Device Address
    private String mLocalShortBluetoothAddress = "";
    private String mLocalAddressHeader = "";
    
+   private WifiController mWifiController;
+   private Hashtable<String,BluetoothDevice> mDeviceMap = new Hashtable<String,BluetoothDevice>();
+   
     boolean mRepeaterMode = false; //by default RT trusted messages
-    boolean mRepeatToIRC = false; //need to add more options here
-    
+    boolean mRepeatToIRC = false; //need to add more options here    
     private IRCUplink mIRCRepeater = null;
     private final static String DEFAULT_IRC_CHANNEL = "#gilgamesh";
     
+    
+    private StatusAdapter mStatusAdapter;
+    private Status mLastStatus = null;
     // String buffer for outgoing messages
     private StringBuffer mOutStringBuffer;
-
-    private StatusAdapter mStatusAdapter;
     
-    private WifiController mWifiController;
+    private static Hashtable<String,Status> mMessageLog = null; //uses hash to ensure we don't display dup messages
+    
+    private ArrayList<DirectMessage> mQueuedDirectMessage = new ArrayList<DirectMessage>();
+    private DirectMessageSession mDirectChatSession;
+    
     
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -93,7 +95,19 @@ public class GilgaService extends Service {
 					sendDirectMessage (status);
 				}
 				else
+				{
+
+		        	mLastStatus = new Status();
+		        	mLastStatus.from = getString(R.string.me_);
+		        	mLastStatus.ts = new java.util.Date().getTime();
+		        	mLastStatus.trusted = false;
+		        	mLastStatus.body = status;
+		        	mLastStatus.reach = mDeviceMap.size();
+		            
+			        mStatusAdapter.add(mLastStatus);
+			        
 					updateStatus (status);
+				}
 				
 			}
 			
@@ -246,11 +260,13 @@ public class GilgaService extends Service {
     	}
 	};
     
-    public void processInboundMessage (String name, String address, boolean trusted)
+    public boolean processInboundMessage (String name, String address, boolean trusted)
     {
     	String messageBuffer = name;
     	
     	StringTokenizer st = new StringTokenizer(messageBuffer,"\n");
+    	
+    	boolean success = false;
     	
     	while (st.hasMoreTokens())
     	{
@@ -263,6 +279,8 @@ public class GilgaService extends Service {
         			message.startsWith(".")||
         			message.startsWith(" "))
         	{
+        		success = true;
+        		
         		message = message.trim();
         		
         		Status status = new Status();
@@ -304,6 +322,8 @@ public class GilgaService extends Service {
             
         	}
     	}
+    	
+    	return success;
     }
     
     
@@ -382,9 +402,6 @@ public class GilgaService extends Service {
     	mWifiController.startWifiDiscovery ();
        
     }
-    
-    private ArrayList<DirectMessage> mQueuedDirectMessage = new ArrayList<DirectMessage>();
-    private DirectMessageSession mDirectChatSession;
     
     private void sendDirectMessage (String message)
     {
@@ -658,7 +675,17 @@ public class GilgaService extends Service {
                 {
                 	String address = device.getAddress();
                 	
-                	processInboundMessage(device.getName(),address,device.getBondState() == BluetoothDevice.BOND_BONDED);
+                	boolean success = processInboundMessage(device.getName(),address,device.getBondState() == BluetoothDevice.BOND_BONDED);
+                	
+                	if (success) //this is a gilgamesh device
+                	{
+                		mDeviceMap.put(device.getAddress(), device);
+                		
+                		//if we have a last status, increase the number of devices reached
+                		if (mLastStatus != null)
+                			mLastStatus.reach++;
+                        
+                	}
                 	
                 	if (mQueuedDirectMessage.size() > 0 && mDirectChatSession != null
                 			&& (mDirectChatSession.getState() != DirectMessageSession.STATE_CONNECTED 

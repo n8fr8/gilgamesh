@@ -8,7 +8,8 @@ public class Status {
 	public String body;
 	public long ts;
 	public boolean trusted = false;
-	public int type;
+	
+	public int reach; //number of devices in area when sent, and/or potential retweets
 	
 	public static Status inflate (Intent intent)
 	{

@@ -21,6 +21,7 @@
     android:layout_margin="6dp"
     android:padding="3dp"
     android:background="#efefef"
+     android:id="@+id/statusbox"
     >
  
     <LinearLayout

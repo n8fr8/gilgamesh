@@ -265,18 +265,6 @@ public class GilgaMeshActivity extends Activity {
         intent.putExtra("status", message);
         startService(intent);
 
-        if (!message.matches(GilgaService.MATCH_DIRECT_MESSAGE)) //if not a direct message
-        {
-        	Status statusMe = new Status();
-            statusMe.from = getString(R.string.me_);
-            statusMe.ts = new java.util.Date().getTime();
-            statusMe.trusted = false;
-            statusMe.body = message;
-            
-        	StatusAdapter.getInstance(GilgaMeshActivity.this).add(statusMe);
-        
-        }
-        
         setStatus(getString(R.string.broadcast_mode_public_) 
         		+ " @"	+ mLocalAddress);
 

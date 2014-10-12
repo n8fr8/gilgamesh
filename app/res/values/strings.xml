@@ -38,7 +38,7 @@
     <string name="connect">Private Message</string>
     <string name="discoverable">Make discoverable</string>
     <string name="connected_to_">"Connected to "</string>
-    <string name="me_">"Me:  "</string>
+    <string name="me_">Me</string>
     <string name="listen_mode">You are in listening only mode</string>
     <string name="broadcast_mode_public_">You are broadcasting as </string>
     <string name="_private_">(private)</string>
@@ -67,4 +67,6 @@
     <string name="error_sending_message_">"Error sending message: "</string>
     
     <string name="update_status_hint">What\'s happening nearby?</string>
+    
+    <string name="reached">reached</string>
 </resources>

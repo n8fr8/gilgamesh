@@ -21,4 +21,5 @@
     <!-- A really bright Holo shade of blue -->
     <color name="holo_blue_bright">#cc00ddff</color>
 
+    <color name="statusboxdefault">#EFEFEF</color>
 </resources>
