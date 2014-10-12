@@ -36,7 +36,7 @@
         
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:fontFamily="sans-serif-light"
-    android:textColor="#888888"
+    android:textColor="#777777"
     android:text="Nathan @n8fr8"
             android:layout_gravity="left"
     android:layout_weight="1"
@@ -48,7 +48,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/time"
         android:layout_alignStart="@id/from"
-            android:textColor="#888888"
+            android:textColor="#777777"
         
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:fontFamily="sans-serif-light"
