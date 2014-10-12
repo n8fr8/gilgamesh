@@ -284,13 +284,6 @@ public class GilgaMeshActivity extends Activity {
         intent.putExtra("status", msgRT);
         startService(intent);
 
-        Status statusMe = new Status();
-        statusMe.from = getString(R.string.me_);
-        statusMe.ts = new java.util.Date().getTime();
-        statusMe.trusted = status.trusted;
-        statusMe.body = msgRT;
-        StatusAdapter.getInstance(GilgaMeshActivity.this).add(statusMe);
-        
         setStatus(getString(R.string.broadcast_mode_public_) 
         		+ " @"	+ mLocalAddress);
         
