@@ -1,4 +1,4 @@
-package info.guardianproject.gilga.service;
+package info.guardianproject.gilga.uplink;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,7 +9,7 @@ import java.net.Socket;
 
 import android.util.Log;
 
-public class IRCRepeater implements Runnable {
+public class IRCUplink implements Uplink, Runnable {
 
 	String mServer;
 	String mNick;
@@ -20,7 +20,7 @@ public class IRCRepeater implements Runnable {
 	Socket mSocket;
 	Thread mThread;
 	
-    public IRCRepeater(String name, String channel) {
+    public IRCUplink(String name, String channel) {
 
         // The server to connect to and our details.
         mServer = "irc.freenode.net";
@@ -50,10 +50,11 @@ public class IRCRepeater implements Runnable {
     	
     }
     
-    public void sendMessage (String msg) throws IOException
+    public boolean sendMessage (String msg) throws IOException
     {
     	mWriter.write("PRIVMSG " + mChannel + " :" + msg + "\r\n");
     	mWriter.flush( );
+    	return true;
     }
     
     public void run ()

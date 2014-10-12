@@ -5,6 +5,8 @@ import info.guardianproject.gilga.R;
 import info.guardianproject.gilga.model.DirectMessage;
 import info.guardianproject.gilga.model.Status;
 import info.guardianproject.gilga.model.StatusAdapter;
+import info.guardianproject.gilga.radio.WifiController;
+import info.guardianproject.gilga.uplink.IRCUplink;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,7 +56,7 @@ public class GilgaService extends Service {
     boolean mRepeaterMode = false; //by default RT trusted messages
     boolean mRepeatToIRC = false; //need to add more options here
     
-    private IRCRepeater mIRCRepeater = null;
+    private IRCUplink mIRCRepeater = null;
     private final static String DEFAULT_IRC_CHANNEL = "#gilgamesh";
     
     // String buffer for outgoing messages
@@ -101,7 +103,7 @@ public class GilgaService extends Service {
 				
 				if (mRepeaterMode && mRepeatToIRC)
 				{
-					mIRCRepeater = new IRCRepeater(mLocalShortBluetoothAddress,DEFAULT_IRC_CHANNEL);
+					mIRCRepeater = new IRCUplink(mLocalShortBluetoothAddress,DEFAULT_IRC_CHANNEL);
 				}
 				else 
 				{

@@ -1,4 +1,6 @@
-package info.guardianproject.gilga.service;
+package info.guardianproject.gilga.radio;
+
+import info.guardianproject.gilga.service.GilgaService;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
