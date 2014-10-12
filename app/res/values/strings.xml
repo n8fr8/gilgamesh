@@ -70,5 +70,7 @@
     
     <string name="update_status_hint">What\'s happening nearby?</string>
     
+    <string name="reaching">reaching</string>
     <string name="reached">reached</string>
+    
 </resources>

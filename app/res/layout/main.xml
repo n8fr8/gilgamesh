@@ -21,8 +21,8 @@
     >
     <ListView android:id="@+id/in"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:stackFromBottom="false"
+        android:layout_height="0dp"
+        android:stackFromBottom="true"
         android:transcriptMode="alwaysScroll"
         android:layout_weight="1"
         android:background="#dedede"

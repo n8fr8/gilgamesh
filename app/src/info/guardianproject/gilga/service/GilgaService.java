@@ -96,13 +96,16 @@ public class GilgaService extends Service {
 				}
 				else
 				{
-
+					if (mLastStatus != null)
+						mLastStatus.active = false;
+					
 		        	mLastStatus = new Status();
 		        	mLastStatus.from = getString(R.string.me_);
 		        	mLastStatus.ts = new java.util.Date().getTime();
 		        	mLastStatus.trusted = false;
 		        	mLastStatus.body = status;
 		        	mLastStatus.reach = mDeviceMap.size();
+		            mLastStatus.active = true;
 		            
 			        mStatusAdapter.add(mLastStatus);
 			        
@@ -266,7 +269,7 @@ public class GilgaService extends Service {
     	
     	StringTokenizer st = new StringTokenizer(messageBuffer,"\n");
     	
-    	boolean success = false;
+    	boolean isNewDevice = false;
     	
     	while (st.hasMoreTokens())
     	{
@@ -290,7 +293,7 @@ public class GilgaService extends Service {
         		
             	if (isNewMessage(status)) //have we seen this message before
             	{
-            		success = true;
+            		isNewDevice = true;
             		
             		mStatusAdapter.add(status);
             		
@@ -324,7 +327,7 @@ public class GilgaService extends Service {
         	}
     	}
     	
-    	return success;
+    	return isNewDevice;
     }
     
     
@@ -676,15 +679,15 @@ public class GilgaService extends Service {
                 {
                 	String address = device.getAddress();
                 	
-                	boolean success = processInboundMessage(device.getName(),address,device.getBondState() == BluetoothDevice.BOND_BONDED);
+                	boolean isNewStatusOrDevice = processInboundMessage(device.getName(),address,device.getBondState() == BluetoothDevice.BOND_BONDED);
                 	
-                	if (success) //this is a gilgamesh device
+                	if (isNewStatusOrDevice) //this is a gilgamesh device
                 	{
                 		mDeviceMap.put(device.getAddress(), device);
                 		
                 		//if we have a last status, increase the number of devices reached
                 		if (mLastStatus != null)
-                			mLastStatus.reach++;
+                			mLastStatus.reach = mDeviceMap.size(); //set to current size
                         
                 	}
                 	

@@ -77,10 +77,7 @@ public class StatusAdapter extends BaseAdapter
 	    {
 	    	DirectMessage dm = (DirectMessage)status;
 
-	    	viewStatus.setBackgroundResource(R.color.holo_green_light);
-	    	txtFrom.setTypeface(null, Typeface.BOLD);
-	    	txtTime.setTypeface(null, Typeface.BOLD);
-	    	txtBody.setTypeface(null, Typeface.BOLD);
+	    	viewStatus.setBackgroundResource(R.color.holo_orange_light);
 	    	
 	    	if (dm.to != null)
 	    	{
@@ -120,10 +117,11 @@ public class StatusAdapter extends BaseAdapter
 	    }
 	    else
 	    {
-	    	txtFrom.setTypeface(null, Typeface.NORMAL);
-	    	txtTime.setTypeface(null, Typeface.NORMAL);
-	    	txtBody.setTypeface(null, Typeface.NORMAL);
-	    	
+	    	if (status.active)
+	    		viewStatus.setBackgroundResource(R.color.holo_green_light);
+	    	else
+		    	viewStatus.setBackgroundResource(R.color.statusboxdefault);
+
 		    String from = status.from;
 		    
 		    if (status.from.length() > 6)
@@ -134,18 +132,23 @@ public class StatusAdapter extends BaseAdapter
 		    if (status.trusted)
 		    {
 		    	from += '*';
-		    	txtFrom.setTypeface(null, Typeface.BOLD);
 		    }
 		    
 		    String fromText = '@' + from;
 		    
 		    if (status.reach > 0)
 		    {
-		    	fromText += " (" + mContext.getString(R.string.reached) + ' ' + status.reach + "\u2713)";
+		    	
+		    	if (status.active)
+		    	{
+		    		fromText += " | " + mContext.getString(R.string.reaching) + ' ' + status.reach + "...";
+		    		fromText += "\u2600";
+		    	}
+		    	else
+		    		fromText += " | " + mContext.getString(R.string.reached) + ' ' + status.reach;
+		    	
 		    }
 		    
-	    	viewStatus.setBackgroundResource(R.color.statusboxdefault);
-
 	    	txtFrom.setText(fromText);
 	    }
 	    

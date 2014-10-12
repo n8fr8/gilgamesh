@@ -37,7 +37,7 @@
         
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:fontFamily="sans-serif-light"
-    android:textColor="#777777"
+    android:textColor="#888888"
     android:text="Nathan @n8fr8"
             android:layout_gravity="left"
     android:layout_weight="1"
@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/time"
         android:layout_alignStart="@id/from"
-            android:textColor="#777777"
+            android:textColor="#888888"
         
     android:textAppearance="?android:attr/textAppearanceSmall"
     android:fontFamily="sans-serif-light"
@@ -67,7 +67,7 @@
 	    android:textAppearance="?android:attr/textAppearanceMedium"
 	    android:fontFamily="sans-serif-light"
 	    android:text="this is a big long message status update foo foo"
-	    
+	    android:autoLink="all"
         />
  
 </RelativeLayout>
