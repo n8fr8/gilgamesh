@@ -279,7 +279,6 @@ public class GilgaService extends Service {
         			message.startsWith(".")||
         			message.startsWith(" "))
         	{
-        		success = true;
         		
         		message = message.trim();
         		
@@ -290,7 +289,9 @@ public class GilgaService extends Service {
         		status.ts = new java.util.Date().getTime();
         		
             	if (isNewMessage(status)) //have we seen this message before
-            	{	
+            	{
+            		success = true;
+            		
             		mStatusAdapter.add(status);
             		
             		if (mRepeaterMode             				
