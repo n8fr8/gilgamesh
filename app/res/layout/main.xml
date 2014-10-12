@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="bottom"
-            android:hint="post status update..."
+            android:hint="@string/update_status_hint"
                 android:inputType="textShortMessage|textAutoCorrect|textCapSentences|textMultiLine|textImeMultiLine"
             android:imeOptions="actionSend|flagNoEnterAction"
         />

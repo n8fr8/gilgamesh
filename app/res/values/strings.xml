@@ -60,10 +60,11 @@
     <string name="menu_copy">Copy</string>
     <string name="_pm_to_">">> PM TO: "</string>
     <string name="_pm_from_">"&lt;&lt; PM FROM: "</string>
-    <string name="_seconds_ago">" seconds ago"</string>
-    <string name="_minutes_ago">" minutes ago"</string>
-    <string name="_hours_ago">" hours ago"</string>
+    <string name="_seconds_ago">s ago</string>
+    <string name="_minutes_ago">m ago</string>
+    <string name="_hours_ago">h ago</string>
     <string name="you_can_t_send_private_messages_to_yourself">You can\'t send private messages to yourself</string>
     <string name="error_sending_message_">"Error sending message: "</string>
     
+    <string name="update_status_hint">What\'s happening nearby?</string>
 </resources>
