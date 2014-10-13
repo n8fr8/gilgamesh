@@ -16,7 +16,7 @@ The design goals of this project are:
 
 Android app:
 
-![alt](https://raw.githubusercontent.com/n8fr8/gilgamesh/master/screens/device-2014-10-06-165447.png | =250px) ![alt](https://raw.githubusercontent.com/n8fr8/gilgamesh/master/screens/device-2014-10-09-120044.png | =250px)
+![alt](https://raw.githubusercontent.com/n8fr8/gilgamesh/master/screens/device-2014-10-06-165447.png) ![alt](https://raw.githubusercontent.com/n8fr8/gilgamesh/master/screens/device-2014-10-09-120044.png)
 
 Gilamesh also supports Linux:
 https://github.com/n8fr8/gilgamesh/blob/master/docs/gilgamesh.sh
