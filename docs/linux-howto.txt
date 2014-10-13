@@ -1,5 +1,4 @@
-
-Since the Gilgamesh system uses plaintext bluetooth names for its basic broadcasting communication mode, it is a very easy system to partipate in from any desktop system. Below is the set of steps that can be performed at the Linux command line to configure the device name to be up to a 248 byte message (~248 ASCII characters, or ~60 Unicode characters).
+Since the Gilgamesh system uses plaintext bluetooth names for its basic broadcasting communication mode, it is a very easy system to participate in from any desktop system. Below is the set of steps that can be performed at the Linux command line to configure the device name to be up to a 248 byte message (~248 ASCII characters, or ~60 Unicode characters).
 
 These commands can be easily used to build a stationary repeater system, using a high powered bluetooth antenna.
 
@@ -11,16 +10,31 @@ These commands can be easily used to build a stationary repeater system, using a
 
 > sudo bt-adapter -l
 
+Available adapters:
+default-device-name (A1:B1:C1:D1:E1:F1)
+
 3) Set Discoverable and Powered
 
-> sudo bt-adapter --adapter=9C:2A:70:61:C3:3A --set Powered true
-> sudo bt-adapter --adapter=9C:2A:70:61:C3:3A --set Discoverable true
-> sudo bt-adapter --adapter=9C:2A:70:61:C3:3A --set DiscoverableTimeout 3600
+> sudo bt-adapter --adapter=A1:B1:C1:D1:E1:F1 --set Powered true
+> sudo bt-adapter --adapter=A1:B1:C1:D1:E1:F1 --set Discoverable true
+> sudo bt-adapter --adapter=A1:B1:C1:D1:E1:F1 --set DiscoverableTimeout 3600
 
 4) Change the name of your device to a Gilgamesh compatible string (starts with space or special character)
 
-> sudo bt-adapter --adapter=9C:2A:70:61:C3:3A --set Name " this is my laptop it is a great big BT device"
+> sudo bt-adapter --adapter=A1:B1:C1:D1:E1:F1 --set Name " this is my laptop it is a great big BT device"
 
 5) Listen for and discover other devices in the area
 
 > sudo bt-adapter -d
+
+Searching...
+
+[A2:B2:C2:D2:E2:F2]
+Name: Now what. This is a message from my phone...yo..
+Alias: Now what. This is a message from my phone...yo..
+Address: A2:B2:C2:D2:E2:F2
+Icon: phone
+Class: 0x5a020c
+LegacyPairing: 0
+Paired: 0
+RSSI: -59
