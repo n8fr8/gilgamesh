@@ -15,7 +15,8 @@ The design goals of this project are:
 * A "fire and forget" mode, where the user can enter a message, put the phone in their pocket, and walk around and area and have it broadcast to all devices it encounters
 
 Android app:
-![alt](https://raw.githubusercontent.com/n8fr8/gilgamesh/master/screens/device-2014-10-06-165447.png) ![alt](https://raw.githubusercontent.com/n8fr8/gilgamesh/master/screens/device-2014-10-09-120044.png)
+
+![alt](https://raw.githubusercontent.com/n8fr8/gilgamesh/master/screens/device-2014-10-06-165447.png =250x) ![alt](https://raw.githubusercontent.com/n8fr8/gilgamesh/master/screens/device-2014-10-09-120044.png =250x)
 
 Gilamesh also supports Linux:
 https://github.com/n8fr8/gilgamesh/blob/master/docs/gilgamesh.sh
