@@ -1,0 +1,26 @@
+
+Since the Gilgamesh system uses plaintext bluetooth names for its basic broadcasting communication mode, it is a very easy system to partipate in from any desktop system. Below is the set of steps that can be performed at the Linux command line to configure the device name to be up to a 248 byte message (~248 ASCII characters, or ~60 Unicode characters).
+
+These commands can be easily used to build a stationary repeater system, using a high powered bluetooth antenna.
+
+1) Install Bluez Tools (https://code.google.com/p/bluez-tools/)
+
+> sudo apt-get install bluez-tools
+
+2) Find your Bluetooth adapter
+
+> sudo bt-adapter -l
+
+3) Set Discoverable and Powered
+
+> sudo bt-adapter --adapter=9C:2A:70:61:C3:3A --set Powered true
+> sudo bt-adapter --adapter=9C:2A:70:61:C3:3A --set Discoverable true
+> sudo bt-adapter --adapter=9C:2A:70:61:C3:3A --set DiscoverableTimeout 3600
+
+4) Change the name of your device to a Gilgamesh compatible string (starts with space or special character)
+
+> sudo bt-adapter --adapter=9C:2A:70:61:C3:3A --set Name " this is my laptop it is a great big BT device"
+
+5) Listen for and discover other devices in the area
+
+> sudo bt-adapter -d
