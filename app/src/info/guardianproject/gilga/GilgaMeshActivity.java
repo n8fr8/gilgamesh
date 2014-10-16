@@ -37,6 +37,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.Toast;
 
 /**
@@ -52,7 +53,6 @@ public class GilgaMeshActivity extends Activity {
     public static final String TOAST = "toast";
 
     // Intent request codes
-    private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 3;
 
     private boolean mRepeaterMode = false;
@@ -61,6 +61,8 @@ public class GilgaMeshActivity extends Activity {
     
     private Handler mHandler = new Handler(); //for posting delayed events
     
+    private StatusListFragment mStatusList;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +73,7 @@ public class GilgaMeshActivity extends Activity {
         checkBluetooth();
 
         setupTabbedBar();
+        
     }
     
     public BluetoothAdapter checkBluetooth ()
@@ -126,7 +129,20 @@ public class GilgaMeshActivity extends Activity {
     	    // Create a tab listener that is called when the user changes tabs.
     	    ActionBar.TabListener tabListener = new ActionBar.TabListener() {
     	        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-    	            // show the given tab
+    	          
+    	        	switch (tab.getPosition())
+    	        	{
+    	        		case 0:
+    	        			((ListView) findViewById(R.id.statusList)).setAdapter(GilgaApp.mStatusAdapter);
+    	        			
+    	        			break;
+    	        		case 1:
+    	        			((ListView) findViewById(R.id.statusList)).setAdapter(GilgaApp.mFavAdapter);
+    	        			
+    	        			break;
+    	        		default:
+    	        	}
+    	        			
     	        }
 
     	        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
@@ -155,7 +171,7 @@ public class GilgaMeshActivity extends Activity {
 	        actionBar.addTab(
 	                actionBar.newTab()
 	                        //.setIcon(android.R.drawable.ic_dialog_alert)
-	                		.setText("Others")
+	                		.setText("Mesh")
 	                        .setTabListener(tabListener));
 	        
 	        actionBar.addTab(

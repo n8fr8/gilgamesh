@@ -1,10 +1,10 @@
 package info.guardianproject.gilga.service;
 
+import info.guardianproject.gilga.GilgaApp;
 import info.guardianproject.gilga.GilgaMeshActivity;
 import info.guardianproject.gilga.R;
 import info.guardianproject.gilga.model.DirectMessage;
 import info.guardianproject.gilga.model.Status;
-import info.guardianproject.gilga.model.StatusAdapter;
 import info.guardianproject.gilga.radio.WifiController;
 import info.guardianproject.gilga.uplink.IRCUplink;
 
@@ -57,7 +57,6 @@ public class GilgaService extends Service {
     private final static String DEFAULT_IRC_CHANNEL = "#gilgamesh";
     
     
-    private StatusAdapter mStatusAdapter;
     private Status mLastStatus = null;
     // String buffer for outgoing messages
     private StringBuffer mOutStringBuffer;
@@ -110,7 +109,7 @@ public class GilgaService extends Service {
 		            if (intent.hasExtra("type"))
 		            	mLastStatus.type = intent.getIntExtra("type", Status.TYPE_GENERAL);
 		            	
-			        mStatusAdapter.add(mLastStatus);
+			        GilgaApp.mStatusAdapter.add(mLastStatus);
 			        
 					updateStatus (status);
 				}
@@ -204,7 +203,7 @@ public class GilgaService extends Service {
 
 	private void init ()
 	{
-		mStatusAdapter = StatusAdapter.getInstance(this);
+		
 		
 		mMessageLog = new Hashtable<String,Status>();
 		
@@ -302,7 +301,7 @@ public class GilgaService extends Service {
     	                sendNotitication(getString(R.string.alert),alertMsg);
             		}
             		
-            		mStatusAdapter.add(status);
+            		GilgaApp.mStatusAdapter.add(status);
             		
             		if (mRepeaterMode             				
             						&& (!message.contains('@' + mLocalAddressHeader))
@@ -327,7 +326,7 @@ public class GilgaService extends Service {
                         statusMe.body = rtMessage;
                         statusMe.type = Status.TYPE_REPEAT;
                         
-                		mStatusAdapter.add(statusMe);
+                		GilgaApp.mStatusAdapter.add(statusMe);
 
             		}
             		
@@ -450,7 +449,7 @@ public class GilgaService extends Service {
 	    	mQueuedDirectMessage.add(dm);
 	    	
 	    	dm.trusted = isSecure;
-	    	mStatusAdapter.add(dm);
+	    	GilgaApp.mStatusAdapter.add(dm);
 	    	
 	    	if (mDirectChatSession == null)
 	    	{
@@ -559,7 +558,7 @@ public class GilgaService extends Service {
 	                				String dmText = dm.body + '\n';
 	                				mDirectChatSession.write(dmText.getBytes());
 	                				dm.delivered = true;
-	                				mStatusAdapter.notifyDataSetChanged();
+	                				GilgaApp.mStatusAdapter.notifyDataSetChanged();
 	                				listSent.add(dm);
 	                			}
 	                		}
@@ -595,7 +594,7 @@ public class GilgaService extends Service {
                 status.type = Status.TYPE_DIRECT;
                 status.ts = new java.util.Date().getTime();
                 **/
-            //    mStatusAdapter.add(status);
+            //    GilgaApp.mStatusAdapter.add(status);
                 break;
             case MESSAGE_READ:
                 byte[] readBuf = (byte[]) msg.obj;
@@ -615,7 +614,7 @@ public class GilgaService extends Service {
 	                
 	                sendNotitication(getString(R.string._pm_from_) + addr, dm.body);
 	                
-	                mStatusAdapter.add(dm);
+	                GilgaApp.mStatusAdapter.add(dm);
                 }
                 
                 break;

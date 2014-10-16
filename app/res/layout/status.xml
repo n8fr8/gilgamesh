@@ -85,6 +85,7 @@
  android:layout_height="wrap_content"
  android:button="@android:drawable/btn_star"
  android:id="@+id/cbfav"
+ android:focusable="false"
  />
     
     </LinearLayout>

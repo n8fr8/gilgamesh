@@ -17,7 +17,7 @@
       package="info.guardianproject.gilga"
       android:versionCode="9"
       android:versionName="0.0.9">
-    <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="18" />
+    <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="20" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
 	<uses-permission android:name="android.permission.VIBRATE" />
@@ -39,6 +39,7 @@
                  android:icon="@drawable/app_icon" 
                  android:allowBackup="false"
                   android:theme="@style/CustomActionBarTheme"
+                  android:name="info.guardianproject.gilga.GilgaApp"
                  >
         <activity android:name="info.guardianproject.gilga.GilgaMeshActivity"
                   android:label="@string/app_name"

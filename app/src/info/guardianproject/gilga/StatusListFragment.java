@@ -82,21 +82,23 @@ public class StatusListFragment extends Fragment {
         // properly.
         View rootView = inflater.inflate(
                 R.layout.status_list, container, false);
-
       
-        setupChat(rootView);
+        setupView(rootView);
      
         return rootView;
     }
     
-   
+    public void switchAdapter(StatusAdapter sa)
+    {
+    	 mConversationView.setAdapter(sa);
+    }
 
-    private void setupChat(final View rootView) {
+    private void setupView(final View rootView) {
 
 
         // Initialize the array adapter for the conversation thread
-        mConversationView = (ListView) rootView.findViewById(R.id.in);
-        mConversationView.setAdapter(StatusAdapter.getInstance(getActivity()));
+        mConversationView = (ListView) rootView.findViewById(R.id.statusList);
+        mConversationView.setAdapter(GilgaApp.mStatusAdapter);
         mConversationView.setOnItemLongClickListener(new OnItemLongClickListener ()
         {
 
@@ -111,7 +113,7 @@ public class StatusListFragment extends Fragment {
 					@Override
 					public boolean onMenuItemClick(MenuItem item) {
 						
-						Status status = (Status)StatusAdapter.getInstance(getActivity()).getItem(position);
+						Status status = (Status)GilgaApp.mStatusAdapter.getItem(position);
 
 						switch (item.getItemId()) {
 

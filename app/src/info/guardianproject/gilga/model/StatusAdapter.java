@@ -1,5 +1,6 @@
 package info.guardianproject.gilga.model;
 
+import info.guardianproject.gilga.GilgaApp;
 import info.guardianproject.gilga.R;
 import info.guardianproject.gilga.service.GilgaService;
 
@@ -8,34 +9,34 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 
 public class StatusAdapter extends BaseAdapter
 {
-	private static StatusAdapter mInstance;
 	private ArrayList<Status> mArrayStatus;
 	private Context mContext;
 	
-	private StatusAdapter (Context context)
+	public StatusAdapter (Context context)
 	{
 		mArrayStatus = new ArrayList<Status>();
 		mContext = context;
 	}
 	
-	public synchronized static StatusAdapter getInstance (Context context)
-	{
-		if (mInstance == null)
-			mInstance = new StatusAdapter(context);
-		
-		return mInstance;
-	}
-	
 	public void add (Status status)
 	{
 		mArrayStatus.add(status);
+		notifyDataSetChanged();		
+	}
+	
+	public void remove (Status status)
+	{
+		mArrayStatus.remove(status);
 		notifyDataSetChanged();		
 	}
 	
@@ -55,7 +56,7 @@ public class StatusAdapter extends BaseAdapter
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, View convertView, ViewGroup parent) {
 		View v = convertView;
 	   
 	    if (v == null) {
@@ -72,7 +73,30 @@ public class StatusAdapter extends BaseAdapter
 	    TextView txtFrom = (TextView) v.findViewById(R.id.from);
 	    TextView txtBody = (TextView) v.findViewById(R.id.body);
 	    TextView txtTime = (TextView) v.findViewById(R.id.time);
-	    CheckBox cbFav = (CheckBox)v.findViewById(R.id.cbfav);
+	    final CheckBox cbFav = (CheckBox)v.findViewById(R.id.cbfav);
+	    
+	    cbFav.setOnClickListener(new OnClickListener ()
+	    {
+
+			@Override
+			public void onClick(View arg0) {
+				
+				Status status = mArrayStatus.get(position);
+				
+				status.faved = (cbFav.isChecked());
+				
+				if (status.faved)
+					GilgaApp.mFavAdapter.add(status);
+				else
+					GilgaApp.mFavAdapter.remove(status);
+					
+				
+				
+				
+			}
+
+	    	
+	    });
 	    
 	    cbFav.setChecked(status.faved);
 	    
