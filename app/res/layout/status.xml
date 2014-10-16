@@ -69,7 +69,7 @@
         android:layout_marginLeft="4dp"
             android:textColor="#222222"
 	    android:textAppearance="?android:attr/textAppearanceMedium"
-	    android:fontFamily="sans-serif-condensed-light"
+	    android:fontFamily="sans-serif-light"
 	    android:autoLink="all"
         />
  
