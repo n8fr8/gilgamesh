@@ -80,4 +80,16 @@
     
     <string name="about">This is an experimental application that utilizes bluetooth and wifi device names to enable "status casting", otherwise known as Twitter-over-Bluetooth.\n\nLearn more at: https://github.com/n8fr8/gilgamesh</string>
     
+    <string name="add_device_to_trusted_list_">add device to trusted list...</string>
+    
+    <string name="removing_device_from_trusted_list_">removing device from trusted list...</string>
+    
+    <string name="bluetooth">Bluetooth</string>
+    
+    <string name="bluetoothle">BluetoothLE</string>
+    
+    <string name="wifidirect">WifiDirect</string>
+    
+    <string name="dbm">dBm</string>
+    
 </resources>
