@@ -38,6 +38,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -75,6 +76,30 @@ public class GilgaMeshActivity extends Activity {
 
         setupTabbedBar();
         
+        handleIntent();
+        
+    }
+    
+    private void handleIntent ()
+    {
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                
+            	 String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+            	    if (sharedText != null) {
+            	        // Update UI to reflect text being shared
+            	    	
+	        			TextView tvStatus = ((TextView) findViewById(R.id.edit_text_out));
+	        			tvStatus.append(sharedText);
+            	    	
+            	    }
+            }
+        }
+        
     }
     
     private void initData ()
@@ -88,6 +113,7 @@ public class GilgaMeshActivity extends Activity {
 		if (GilgaApp.mFavAdapter == null)
 			GilgaApp.mFavAdapter = new StatusAdapter(this);
     }
+    
     public BluetoothAdapter checkBluetooth ()
     {
         // Get local Bluetooth adapter
