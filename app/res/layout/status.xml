@@ -15,10 +15,14 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
      android:layout_width="match_parent" android:layout_height="wrap_content"
+     android:orientation="vertical"
     >
 <RelativeLayout 
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:layout_margin="6dp"
+    android:layout_marginTop="3dp"
+    android:layout_marginLeft="3dp"
+    android:layout_marginRight="3dp"
+    android:layout_marginBottom="0dp"
     android:padding="3dp"
     android:background="#efefef"
      android:id="@+id/statusbox"
@@ -65,10 +69,34 @@
         android:layout_marginLeft="4dp"
             android:textColor="#222222"
 	    android:textAppearance="?android:attr/textAppearanceMedium"
-	    android:fontFamily="sans-serif-light"
-	    android:text="this is a big long message status update foo foo"
+	    android:fontFamily="sans-serif-condensed-light"
 	    android:autoLink="all"
         />
  
+       <LinearLayout
+             android:layout_below="@id/body"
+     android:layout_width="match_parent" android:layout_height="wrap_content"
+     android:orientation="horizontal"     
+       android:id="@+id/subInfoline"  
+       android:gravity="right"     
+    >
+    <CheckBox
+ android:layout_width="wrap_content"
+ android:layout_height="wrap_content"
+ android:button="@android:drawable/btn_star"
+ android:id="@+id/cbfav"
+ />
+    
+    </LinearLayout>
 </RelativeLayout>
+<View
+        android:layout_width="match_parent"
+        android:layout_height="5dip"
+        android:layout_marginTop="0dp"
+    android:layout_marginLeft="3dp"
+    android:layout_marginRight="3dp"
+    android:layout_marginBottom="3dp"
+        android:background="@drawable/dropshadow"
+        >
+    </View>
 </LinearLayout>
