@@ -23,13 +23,6 @@ public class GilgaApp extends Application {
 	public void onCreate() {
 		super.onCreate();
 		
-
-		//these adapters are a totally short-term hack! :)
-		if (mStatusAdapter == null)
-			mStatusAdapter = new StatusAdapter(this);
-		
-		if (mFavAdapter == null)
-			mFavAdapter = new StatusAdapter(this);
 	}
 
     

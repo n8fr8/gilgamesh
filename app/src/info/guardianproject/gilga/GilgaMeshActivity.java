@@ -16,6 +16,7 @@
 
 package info.guardianproject.gilga;
 
+import info.guardianproject.gilga.model.StatusAdapter;
 import info.guardianproject.gilga.service.GilgaService;
 
 import java.io.File;
@@ -68,12 +69,25 @@ public class GilgaMeshActivity extends Activity {
         // Set up the window layout
         setContentView(R.layout.main);
         
+        initData();
+        
         checkBluetooth();
 
         setupTabbedBar();
         
     }
     
+    private void initData ()
+    {
+
+
+		//these adapters are a totally short-term hack! :)
+		if (GilgaApp.mStatusAdapter == null)
+			GilgaApp.mStatusAdapter = new StatusAdapter(this);
+		
+		if (GilgaApp.mFavAdapter == null)
+			GilgaApp.mFavAdapter = new StatusAdapter(this);
+    }
     public BluetoothAdapter checkBluetooth ()
     {
         // Get local Bluetooth adapter
