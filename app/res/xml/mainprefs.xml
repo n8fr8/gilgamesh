@@ -1,0 +1,68 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+<PreferenceCategory android:title="General">
+<CheckBoxPreference 
+android:defaultValue="false" 
+android:key="pref_trusted_only"
+android:title="Trusted Only"
+android:summary="Only allow communication with trusted (paired) devices"
+android:enabled="true"/>
+
+</PreferenceCategory>
+    
+<PreferenceCategory android:title="Service">
+<CheckBoxPreference 
+android:defaultValue="true" 
+android:key="pref_start_boot"
+android:title="Start Automatically"
+android:summary="Start autimatically when your devices powers on"
+android:enabled="true"/>
+
+<CheckBoxPreference
+android:defaultValue="true" 
+android:key="pref_persistent_notifications"
+android:summary="Use the permanent notification to keep the background service on"
+android:enabled="true" 
+android:title="Background Reliability"/>
+
+<EditTextPreference android:key="pref_default_name"
+android:title="Default Device Name"
+android:summary="Reset your device name to this when the app shutsdown"
+/>
+</PreferenceCategory>
+<PreferenceCategory android:title="Repeater">
+
+<CheckBoxPreference
+android:defaultValue="false" 
+android:key="pref_repeater"
+android:summary="Extend the range of received status by making your device auto-repeat"
+android:enabled="true" 
+android:title="Status Repeater"/>
+
+<CheckBoxPreference
+android:defaultValue="true" 
+android:key="pref_repeater_trusted"
+android:summary="Only repeat trusted devices (bluetooth paired)"
+android:enabled="true" 
+android:title="Repeat Trusted Only"/>
+
+<CheckBoxPreference
+android:defaultValue="false" 
+android:key="pref_repeater_irc"
+android:summary="Repeat received messages to a public IRC channel"
+android:enabled="true" 
+android:title="Repeat to IRC"/>
+
+<EditTextPreference android:key="pref_irc_server"
+android:title="IRC Repeater Host"
+android:summary="IRC Service (freenode.net, oftc.net) to repeat statuses to"
+/>
+
+<EditTextPreference android:key="pref_irc_channel"
+android:title="IRC Repeater Channel"
+android:summary="Channel name (#gilgameshlive) to repeat status updates to"
+/>
+
+
+</PreferenceCategory> 
+</PreferenceScreen>

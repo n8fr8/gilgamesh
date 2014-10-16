@@ -3,9 +3,9 @@
   <!-- A light Holo shade of blue -->
     <color name="holo_blue_light">#cc33b5e5</color>
     <!-- A light Holo shade of green -->
-    <color name="holo_green_light">#cc99dd00</color>
+    <color name="holo_green_light">#44aaff00</color>
     <!-- A light Holo shade of red -->
-    <color name="holo_red_light">#ccff4444</color>
+    <color name="holo_red_light">#44ff4444</color>
     <!-- A dark Holo shade of blue -->
     <color name="holo_blue_dark">#cc0099cc</color>
     <!-- A dark Holo shade of green -->
@@ -15,7 +15,7 @@
     <!-- A Holo shade of purple -->
     <color name="holo_purple">#ccaa66cc</color>
     <!-- A light Holo shade of orange -->
-    <color name="holo_orange_light">#aaffcc44</color>
+    <color name="holo_orange_light">#66ffcc44</color>
     <!-- A dark Holo shade of orange -->
     <color name="holo_orange_dark">#ccff8800</color>
     <!-- A really bright Holo shade of blue -->

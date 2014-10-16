@@ -15,7 +15,7 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">Gilgamesh</string>
+    <string name="app_name">Gilga</string>
 
     <!--  BluetoothChat -->
     <string name="send">Send</string>
@@ -72,5 +72,6 @@
     
     <string name="reaching">reaching</string>
     <string name="reached">reached</string>
+    <string name="alert">Alert</string>
     
 </resources>

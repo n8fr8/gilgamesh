@@ -16,19 +16,16 @@
 
 package info.guardianproject.gilga;
 
-import info.guardianproject.gilga.model.DirectMessage;
-import info.guardianproject.gilga.model.Status;
-import info.guardianproject.gilga.model.StatusAdapter;
 import info.guardianproject.gilga.service.GilgaService;
 
 import java.io.File;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -37,21 +34,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.PopupMenu;
-import android.widget.PopupMenu.OnMenuItemClickListener;
-import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -61,7 +46,6 @@ public class GilgaMeshActivity extends Activity {
     // Debugging
     private static final String TAG = "GILGA";
     private static final boolean D = true;
-
 
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
@@ -75,11 +59,6 @@ public class GilgaMeshActivity extends Activity {
 
     private String mLocalAddress = null;
     
-    // Layout Views
-    private ListView mConversationView;
-    private EditText mOutEditText;
-    private ImageButton mSendButton;
-
     private Handler mHandler = new Handler(); //for posting delayed events
     
     @Override
@@ -89,6 +68,13 @@ public class GilgaMeshActivity extends Activity {
         // Set up the window layout
         setContentView(R.layout.main);
         
+        checkBluetooth();
+
+        setupTabbedBar();
+    }
+    
+    public BluetoothAdapter checkBluetooth ()
+    {
         // Get local Bluetooth adapter
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -96,10 +82,8 @@ public class GilgaMeshActivity extends Activity {
         if (bluetoothAdapter == null) {
             Toast.makeText(this, R.string.please_enable_bluetooth_to_use_this_app, Toast.LENGTH_LONG).show();
             finish();
-            return;
+            return null;
         }
-        
-       
 
         // If BT is not on and discoverable, request to make it so -
         // setupChat() will then be called during onActivityResult
@@ -128,8 +112,59 @@ public class GilgaMeshActivity extends Activity {
 
 
         }
-        setupChat();
-        
+     
+        return bluetoothAdapter;
+    }
+    
+    private void setupTabbedBar ()
+    {
+    	   final ActionBar actionBar = getActionBar();
+
+    	    // Specify that tabs should be displayed in the action bar.
+    	    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+    	    // Create a tab listener that is called when the user changes tabs.
+    	    ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+    	        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+    	            // show the given tab
+    	        }
+
+    	        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+    	            // hide the given tab
+    	        }
+
+    	        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+    	            // probably ignore this event
+    	        }
+    	    };
+
+    	    // Add 3 tabs, specifying the tab's text and TabListener
+    	    
+	        actionBar.addTab(
+	                actionBar.newTab()
+	                        //.setIcon(android.R.drawable.ic_dialog_alert)
+	                		.setText("Status")
+	                        .setTabListener(tabListener));
+    	    
+	        actionBar.addTab(
+	                actionBar.newTab()
+	                        //.setIcon(android.R.drawable.ic_dialog_alert)
+	                		.setText("Favs")
+	                        .setTabListener(tabListener));
+	        
+	        actionBar.addTab(
+	                actionBar.newTab()
+	                        //.setIcon(android.R.drawable.ic_dialog_alert)
+	                		.setText("Others")
+	                        .setTabListener(tabListener));
+	        
+	        actionBar.addTab(
+	                actionBar.newTab()
+	                        //.setIcon(android.R.drawable.ic_dialog_alert)
+	                		.setText("Info")
+	                        .setTabListener(tabListener));
+    	    
+    
     }
     
    
@@ -145,93 +180,7 @@ public class GilgaMeshActivity extends Activity {
         
     }
 
-    private void setupChat() {
-//        Log.d(TAG, "setupChat()");
-
-        // Initialize the array adapter for the conversation thread
-        mConversationView = (ListView) findViewById(R.id.in);
-        mConversationView.setAdapter(StatusAdapter.getInstance(this));
-        mConversationView.setOnItemLongClickListener(new OnItemLongClickListener ()
-        {
-
-			@Override
-			public boolean onItemLongClick(AdapterView<?> arg0, View view,
-					final int position, long arg3) {
-				
-				PopupMenu popupMenu = new PopupMenu(GilgaMeshActivity.this, view);
-				popupMenu.setOnMenuItemClickListener(new OnMenuItemClickListener()
-				{
-
-					@Override
-					public boolean onMenuItemClick(MenuItem item) {
-						
-						Status status = (Status)StatusAdapter.getInstance(GilgaMeshActivity.this).getItem(position);
-
-						switch (item.getItemId()) {
-
-						case R.id.item_reshare:
-
-							if (!(status instanceof DirectMessage)) //DM's can't be reshared
-								reshareStatus(status);
-							return true;
-						case R.id.item_copy:
-							
-
-							ClipboardManager clipboard = (ClipboardManager)
-					        getSystemService(Context.CLIPBOARD_SERVICE);
-							ClipData clip = ClipData.newPlainText("simple text",status.body);
-							clipboard.setPrimaryClip(clip);
-
-							
-							return true;
-						case R.id.item_reply:
-							
-							String reply = "@" + GilgaService.mapToNickname(status.from) + " ";
-					    	mOutEditText.setText(reply);
-					    	mOutEditText.setSelection(reply.length());
-
-							return true;
-						case R.id.item_direct_message:
-							
-							String dm = "pm " + status.from + " ";
-					    	mOutEditText.setText(dm);
-					    	mOutEditText.setSelection(dm.length());
-
-							return true;
-						default:
-							return false;
-						}
-
-					}
-			
-				});
-				
-				popupMenu.inflate(R.menu.popup_menu);
-				popupMenu.show();
-				
-				
-				return false;
-			}
-        	
-        });
-        
-        // Initialize the compose field with a listener for the return key
-        mOutEditText = (EditText) findViewById(R.id.edit_text_out);
-        mOutEditText.setOnEditorActionListener(mWriteListener);
-
-        // Initialize the send button with a listener that for click events
-        mSendButton = (ImageButton) findViewById(R.id.button_send);
-        mSendButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                // Send a message using content of the edit text widget
-                TextView view = (TextView) findViewById(R.id.edit_text_out);
-                String message = view.getText().toString();
-                
-                updateStatus(message);
-            }
-        });
-    }
-
+  
     @Override
     public synchronized void onPause() {
         super.onPause();
@@ -239,53 +188,6 @@ public class GilgaMeshActivity extends Activity {
     }
    
 
-    // The action listener for the EditText widget, to listen for the return key
-    private TextView.OnEditorActionListener mWriteListener =
-        new TextView.OnEditorActionListener() {
-        public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-            // If the action is a key-up event on the return key, send the message
-            if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
-                String message = view.getText().toString();
-                updateStatus(message);
-            }
-            if(D) Log.i(TAG, "END onEditorAction");
-            return true;
-        }
-    };
-    
-    
-    private void updateStatus (String status)
-    {
-    	//add message to queue for service to process TODO
-
-        Intent intent = new Intent(this, GilgaService.class);
-        intent.putExtra("status", status);
-        startService(intent);
-
-        if (!status.matches(GilgaService.MATCH_DIRECT_MESSAGE))
-	        setStatus(getString(R.string.broadcast_mode_public_) 
-	        		+ " @"	+ mLocalAddress);
-        
-        mOutEditText.setText("");
-    }
-
-    private void reshareStatus (Status status)
-    {
-    	String from = status.from;
-    	if (from.length() > 6)
-    		from = GilgaService.mapToNickname(from);
-    	
-		String msgRT = "RT @" + from + ' ' + status.body; 
-		
-		Intent intent = new Intent(this, GilgaService.class);
-        intent.putExtra("status", msgRT);
-        startService(intent);
-
-        setStatus(getString(R.string.broadcast_mode_public_) 
-        		+ " @"	+ mLocalAddress);
-        
-			
-    }
     
     private final void setStatus(CharSequence subTitle) {
         final ActionBar actionBar = getActionBar();
@@ -365,19 +267,6 @@ public class GilgaMeshActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent serverIntent = null;
         switch (item.getItemId()) {
-     //   case R.id.secure_connect_scan:private final IntentFilter intentFilter = new IntentFilter();
-
-            // Launch the DeviceListActivity to see devices and do scan
-       //     serverIntent = new Intent(this, DeviceListActivity.class);
-         //   startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
-           // return true;
-        /**
-        case R.id.connect_scan:
-            // Launch the DeviceListActivity to see devices and do scan
-            serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
-            return true;
-            **/
         case R.id.share_app:
         	shareAPKFile();
         	break;
@@ -385,7 +274,7 @@ public class GilgaMeshActivity extends Activity {
         	shutdown();
         	break;
         case R.id.toggle_visibility:
-        	toggleVisibility();
+        	toggleVisibility(false);
         	break;
         case R.id.toggle_repeater:
         	toggleRepeater();        	
@@ -393,10 +282,10 @@ public class GilgaMeshActivity extends Activity {
         }
         return false;
     }
-    
-    private void toggleVisibility ()
+        
+    public void toggleVisibility (boolean forceVisible)
     {
-        final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        final BluetoothAdapter bluetoothAdapter = checkBluetooth();
 
     	if (bluetoothAdapter.getScanMode() !=
     	          BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
@@ -406,7 +295,7 @@ public class GilgaMeshActivity extends Activity {
     	            startActivity(discoverableIntent);
     	            
     	        }
-    	else
+    	else if (!forceVisible)
     	{
     		  Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 	            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 1);
@@ -471,5 +360,5 @@ public class GilgaMeshActivity extends Activity {
     }
     
   
-    
+
 }
