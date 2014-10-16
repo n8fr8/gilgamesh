@@ -6,11 +6,11 @@ import info.guardianproject.gilga.service.GilgaService;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 public class StatusAdapter extends BaseAdapter
@@ -72,6 +72,9 @@ public class StatusAdapter extends BaseAdapter
 	    TextView txtFrom = (TextView) v.findViewById(R.id.from);
 	    TextView txtBody = (TextView) v.findViewById(R.id.body);
 	    TextView txtTime = (TextView) v.findViewById(R.id.time);
+	    CheckBox cbFav = (CheckBox)v.findViewById(R.id.cbfav);
+	    
+	    cbFav.setChecked(status.faved);
 	    
 	    if (status instanceof DirectMessage)
 	    {
@@ -117,7 +120,9 @@ public class StatusAdapter extends BaseAdapter
 	    }
 	    else
 	    {
-	    	if (status.active)
+	    	if (status.type == Status.TYPE_ALERT)
+	    		viewStatus.setBackgroundResource(R.color.holo_red_light);
+	    	else if (status.active)
 	    		viewStatus.setBackgroundResource(R.color.holo_green_light);
 	    	else
 		    	viewStatus.setBackgroundResource(R.color.statusboxdefault);

@@ -11,14 +11,13 @@ public class Status {
 	public boolean active = false; //is currently broadcasting
 	public int reach; //number of devices in area when sent, and/or potential retweets
 	
-	public static Status inflate (Intent intent)
-	{
-		Status msg = new Status();
-		msg.from = intent.getStringExtra("from");
-		msg.body = intent.getStringExtra("body");
-		msg.ts = intent.getLongExtra("ts",0);
-		msg.trusted = intent.getBooleanExtra("trusted", false);
-		
-		return msg;
-	}
+	public boolean faved = false;
+	
+	public int type = TYPE_GENERAL;
+	
+	public final static int TYPE_GENERAL = 0;
+	public final static int TYPE_RETWEET = 1;
+	public final static int TYPE_REPEAT = 2;
+	public final static int TYPE_ALERT = 3;
+	
 }

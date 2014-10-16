@@ -107,6 +107,9 @@ public class GilgaService extends Service {
 		        	mLastStatus.reach = mDeviceMap.size();
 		            mLastStatus.active = true;
 		            
+		            if (intent.hasExtra("type"))
+		            	mLastStatus.type = intent.getIntExtra("type", Status.TYPE_GENERAL);
+		            	
 			        mStatusAdapter.add(mLastStatus);
 			        
 					updateStatus (status);
@@ -118,13 +121,11 @@ public class GilgaService extends Service {
 			{
 				mRepeaterMode = intent.getBooleanExtra("repeat", false);
 				
-				if (mRepeaterMode && mRepeatToIRC)
+				if (mRepeatToIRC)
 				{
-					mIRCRepeater = new IRCUplink(mLocalShortBluetoothAddress,DEFAULT_IRC_CHANNEL);
-				}
-				else 
-				{
-					if (mIRCRepeater != null)
+					if (mRepeaterMode)
+						mIRCRepeater = new IRCUplink(mLocalShortBluetoothAddress,DEFAULT_IRC_CHANNEL);
+					else if (mIRCRepeater != null)
 						mIRCRepeater.shutdown();
 				}
 			}
@@ -132,7 +133,6 @@ public class GilgaService extends Service {
 		
 		startListening();
 		
-
 		startForegroundNotify();
 		
 	    return (START_STICKY);
@@ -295,6 +295,13 @@ public class GilgaService extends Service {
             	{
             		isNewDevice = true;
             		
+            		if (message.startsWith("!"))
+            		{
+            			status.type = Status.TYPE_ALERT;
+            			String alertMsg = '@' + mapToNickname(status.from) + ": " + status.body;
+    	                sendNotitication(getString(R.string.alert),alertMsg);
+            		}
+            		
             		mStatusAdapter.add(status);
             		
             		if (mRepeaterMode             				
@@ -318,6 +325,8 @@ public class GilgaService extends Service {
                         statusMe.ts = status.ts;
                         statusMe.trusted = trusted;
                         statusMe.body = rtMessage;
+                        statusMe.type = Status.TYPE_REPEAT;
+                        
                 		mStatusAdapter.add(statusMe);
 
             		}
