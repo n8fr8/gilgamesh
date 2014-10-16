@@ -16,9 +16,11 @@
 
 package info.guardianproject.gilga;
 
+import info.guardianproject.gilga.model.Device;
 import info.guardianproject.gilga.radio.BluetoothClassicController;
 import info.guardianproject.gilga.service.GilgaService;
 import android.app.Fragment;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.os.Handler;
@@ -116,22 +118,48 @@ public class DeviceListFragment extends Fragment {
     	mPairedDevicesArrayAdapter.clear();
     	mNewDevicesArrayAdapter.clear();
     	
-        for (BluetoothDevice device: GilgaService.mDeviceMap.values())
+    	
+        for (Device device: GilgaService.mDeviceMap.values())
         {
-        	if (device.getBondState() == BluetoothDevice.BOND_BONDED)
-        		mPairedDevicesArrayAdapter.add(
-        				'@' + GilgaService.mapToNickname(device.getAddress())
-        				+ "\n" + device.getAddress());
+        	if (device.mTrusted)
+        		mPairedDevicesArrayAdapter.add(formatItem(device));
         }
         
-        for (BluetoothDevice device: GilgaService.mDeviceMap.values())
+        for (Device device: GilgaService.mDeviceMap.values())
         {
-        	if (device.getBondState() != BluetoothDevice.BOND_BONDED)
-        		mNewDevicesArrayAdapter.add('@' + GilgaService.mapToNickname(device.getAddress()) + "\n" + device.getAddress());
+        	if (!device.mTrusted)
+        		mNewDevicesArrayAdapter.add(formatItem(device));
         }
 
     }
     
+    private String formatItem (Device device)
+    {
+    	StringBuffer sb = new StringBuffer();
+    	
+    	sb.append('@');
+    	sb.append(device.mName);
+    	sb.append(" (");
+    	
+    	if (device.mType == Device.TYPE_BLUETOOTH_CLASSIC)
+    		sb.append (getString(R.string.bluetooth));
+    	else if (device.mType == Device.TYPE_BLUETOOTH_LE)
+    		sb.append (getString(R.string.bluetoothle));
+    	else if (device.mType == Device.TYPE_WIFI_DIRECT)
+    		sb.append (getString(R.string.wifidirect));	
+    	
+    	if (device.mSignalInfo != null)
+    	{
+    		sb.append(' ');
+    		sb.append(device.mSignalInfo);
+    	}
+    	
+    	sb.append(")");
+    	sb.append('\n');
+    	sb.append(device.mAddress);
+    	
+    	return sb.toString();
+    }
 	@Override
 	public void onHiddenChanged(boolean hidden) {
 		// TODO Auto-generated method stub
@@ -142,22 +170,30 @@ public class DeviceListFragment extends Fragment {
 	}
 	
 
-	private void togglePairing (BluetoothDevice device)
+	private void togglePairing (Device device)
 	{
-		   
-    	if (device.getBondState() != BluetoothDevice.BOND_BONDED)
-    	{
-    		BluetoothClassicController.pairDevice(device);
-    		Toast.makeText(getActivity(), "add device to trusted list...", Toast.LENGTH_LONG).show();
 
-    	}
-    	else
-    	{
-    		BluetoothClassicController.unpairDevice(device);
-    		Toast.makeText(getActivity(), "removing device from trusted list...", Toast.LENGTH_LONG).show();
-
-    	}
-
+		device.mTrusted = !device.mTrusted; //toggle trusted state
+		
+		if (device.mType == Device.TYPE_BLUETOOTH_CLASSIC)
+		{
+	        BluetoothDevice bDevice = (BluetoothDevice)device.mInstance;
+	        
+	    	if (device.mTrusted)
+	    	{
+	    		BluetoothClassicController.pairDevice(bDevice);
+	    		Toast.makeText(getActivity(), R.string.add_device_to_trusted_list_, Toast.LENGTH_LONG).show();
+	
+	    	}
+	    	else
+	    	{
+	    		BluetoothClassicController.unpairDevice(bDevice);
+	    		Toast.makeText(getActivity(), R.string.removing_device_from_trusted_list_, Toast.LENGTH_LONG).show();
+	
+	    	}
+	
+		}
+		
 
     	mHandler.postDelayed(new Runnable ()
     	{
@@ -179,7 +215,7 @@ public class DeviceListFragment extends Fragment {
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
 
-            BluetoothDevice device = GilgaService.mDeviceMap.get(address);
+            Device device = GilgaService.mDeviceMap.get(address);
         
             togglePairing(device);
         }

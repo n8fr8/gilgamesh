@@ -3,6 +3,7 @@ package info.guardianproject.gilga.service;
 import info.guardianproject.gilga.GilgaApp;
 import info.guardianproject.gilga.GilgaMeshActivity;
 import info.guardianproject.gilga.R;
+import info.guardianproject.gilga.model.Device;
 import info.guardianproject.gilga.model.DirectMessage;
 import info.guardianproject.gilga.model.Status;
 import info.guardianproject.gilga.radio.WifiController;
@@ -49,7 +50,7 @@ public class GilgaService extends Service {
    private String mLocalAddressHeader = "";
    
    private WifiController mWifiController;
-   public static Hashtable<String,BluetoothDevice> mDeviceMap = new Hashtable<String,BluetoothDevice>();
+   public static Hashtable<String,Device> mDeviceMap = new Hashtable<String,Device>();
    
     boolean mRepeaterMode = false; //by default RT trusted messages
     boolean mRepeatToIRC = false; //need to add more options here    
@@ -691,12 +692,25 @@ public class GilgaService extends Service {
                 	
                 	if (isNewStatusOrDevice) //this is a gilgamesh device
                 	{
-                		mDeviceMap.put(device.getAddress(), device);
+                		Device d = new Device(device);
+                		mDeviceMap.put(device.getAddress(), d);
+                		
+                        int  rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI,Short.MIN_VALUE);
+                        d.mSignalInfo = rssi + context.getString(R.string.dbm);
                 		
                 		//if we have a last status, increase the number of devices reached
                 		if (mLastStatus != null)
                 			mLastStatus.reach = mDeviceMap.size(); //set to current size
                         
+                	}
+                	else
+                	{
+                		Device d = mDeviceMap.get(device.getAddress());
+                		if (d != null)
+                		{
+                            int  rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI,Short.MIN_VALUE);
+                            d.mSignalInfo = rssi + context.getString(R.string.dbm);
+                		}
                 	}
                 	
                 	if (mQueuedDirectMessage.size() > 0 && mDirectChatSession != null
@@ -761,6 +775,12 @@ public class GilgaService extends Service {
                 
             	WifiP2pDevice device = (WifiP2pDevice) intent.getParcelableExtra(
                         WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+            	
+            	mDeviceMap.put(device.deviceAddress, new Device(device));
+        		
+        		//if we have a last status, increase the number of devices reached
+        		if (mLastStatus != null)
+        			mLastStatus.reach = mDeviceMap.size(); //set to current size
 
             	 boolean trusted = false; //not sure how to do this with wifi
             	 
