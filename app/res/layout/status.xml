@@ -71,6 +71,9 @@
 	    android:textAppearance="?android:attr/textAppearanceMedium"
 	    android:fontFamily="sans-serif-light"
 	    android:autoLink="all"
+	    
+ 		android:focusable="false"
+ 
         />
  
        <LinearLayout

@@ -157,7 +157,7 @@ public class StatusListFragment extends Fragment {
 				popupMenu.show();
 				
 				
-				return false;
+				return true;
 			}
         	
         });
