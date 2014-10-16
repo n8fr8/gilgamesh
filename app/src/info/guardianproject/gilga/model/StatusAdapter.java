@@ -89,8 +89,6 @@ public class StatusAdapter extends BaseAdapter
 					GilgaApp.mFavAdapter.add(status);
 				else
 					GilgaApp.mFavAdapter.remove(status);
-					
-				
 				
 				
 			}

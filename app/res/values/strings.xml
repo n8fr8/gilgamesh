@@ -30,7 +30,7 @@
     <string name="select_device">select a device to connect</string>
     <string name="none_paired">No devices have been paired</string>
     <string name="none_found">No devices found</string>
-    <string name="title_paired_devices">Paired Devices</string>
+    <string name="title_paired_devices">Trusted Devices</string>
     <string name="title_other_devices">Other Available Devices</string>
     <string name="button_scan">Scan for devices</string>
 
@@ -39,7 +39,7 @@
     <string name="discoverable">Make discoverable</string>
     <string name="connected_to_">"Connected to "</string>
     <string name="me_">Me</string>
-    <string name="listen_mode">Listening only mode</string>
+    <string name="listen_mode">Listening...</string>
     <string name="broadcast_mode_public_">Broadcasting as </string>
     <string name="_private_">(private)</string>
     <string name="you_are_">"You are: "</string>
@@ -73,5 +73,11 @@
     <string name="reaching">reaching</string>
     <string name="reached">reached</string>
     <string name="alert">Alert</string>
+    <string name="status">Status</string>
+    <string name="favs">Favs</string>
+    <string name="nearby">Nearby</string>
+    <string name="info">Info</string>
+    
+    <string name="about">This is an experimental application that utilizes bluetooth and wifi device names to enable "status casting", otherwise known as Twitter-over-Bluetooth.\n\nLearn more at: https://github.com/n8fr8/gilgamesh</string>
     
 </resources>

@@ -49,7 +49,7 @@ public class GilgaService extends Service {
    private String mLocalAddressHeader = "";
    
    private WifiController mWifiController;
-   private Hashtable<String,BluetoothDevice> mDeviceMap = new Hashtable<String,BluetoothDevice>();
+   public static Hashtable<String,BluetoothDevice> mDeviceMap = new Hashtable<String,BluetoothDevice>();
    
     boolean mRepeaterMode = false; //by default RT trusted messages
     boolean mRepeatToIRC = false; //need to add more options here    

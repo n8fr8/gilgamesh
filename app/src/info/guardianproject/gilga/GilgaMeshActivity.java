@@ -22,7 +22,6 @@ import java.io.File;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
@@ -61,7 +60,6 @@ public class GilgaMeshActivity extends Activity {
     
     private Handler mHandler = new Handler(); //for posting delayed events
     
-    private StatusListFragment mStatusList;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -99,15 +97,7 @@ public class GilgaMeshActivity extends Activity {
         {
         	mLocalAddress = GilgaService.mapToNickname(bluetoothAdapter.getAddress());
 
-        	if (bluetoothAdapter.getScanMode() ==
-        	          BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {        		
-        	
-                setStatus(getString(R.string.broadcast_mode_public_) 
-                		+ " @"	+ mLocalAddress);
-        	}
-        	else    
-        		setStatus(getString(R.string.listen_mode));
-        	
+        	resetTitle();
        
             Intent intent = new Intent(this, GilgaService.class);
             intent.putExtra("listen", true);
@@ -133,12 +123,22 @@ public class GilgaMeshActivity extends Activity {
     	        	switch (tab.getPosition())
     	        	{
     	        		case 0:
+    	        			showStatus();
     	        			((ListView) findViewById(R.id.statusList)).setAdapter(GilgaApp.mStatusAdapter);
     	        			
     	        			break;
     	        		case 1:
+    	        			showStatus();
     	        			((ListView) findViewById(R.id.statusList)).setAdapter(GilgaApp.mFavAdapter);
     	        			
+    	        			break;
+    	        		case 2:
+    	        			showNearby();
+    	        			
+    	        		
+    	        			break;
+    	        		case 3:
+    	        			showInfo();
     	        			break;
     	        		default:
     	        	}
@@ -159,31 +159,62 @@ public class GilgaMeshActivity extends Activity {
 	        actionBar.addTab(
 	                actionBar.newTab()
 	                        //.setIcon(android.R.drawable.ic_dialog_alert)
-	                		.setText("Status")
+	                		.setText(R.string.status)
 	                        .setTabListener(tabListener));
     	    
 	        actionBar.addTab(
 	                actionBar.newTab()
 	                        //.setIcon(android.R.drawable.ic_dialog_alert)
-	                		.setText("Favs")
+	                		.setText(R.string.favs)
 	                        .setTabListener(tabListener));
 	        
 	        actionBar.addTab(
 	                actionBar.newTab()
 	                        //.setIcon(android.R.drawable.ic_dialog_alert)
-	                		.setText("Mesh")
+	                		.setText(R.string.nearby)
 	                        .setTabListener(tabListener));
 	        
 	        actionBar.addTab(
 	                actionBar.newTab()
 	                        //.setIcon(android.R.drawable.ic_dialog_alert)
-	                		.setText("Info")
+	                		.setText(R.string.info)
 	                        .setTabListener(tabListener));
     	    
     
     }
     
+   private void showStatus ()
+   {
+	  FragmentManager fm = getFragmentManager();
+	   FragmentTransaction ft = fm.beginTransaction();
+	   ft.show(fm.findFragmentById(R.id.status_list));
+	   ft.hide(fm.findFragmentById(R.id.device_list));
+	   ft.hide(fm.findFragmentById(R.id.info_screen));
+
+	    ft.commit();
+   }
    
+   private void showNearby ()
+   {
+	   FragmentManager fm = getFragmentManager();
+	   FragmentTransaction ft = fm.beginTransaction();
+	   ft.hide(fm.findFragmentById(R.id.status_list));
+	   ft.hide(fm.findFragmentById(R.id.info_screen));
+	   ft.show(fm.findFragmentById(R.id.device_list));
+	   
+	    ft.commit();
+   }
+   
+   private void showInfo ()
+   {
+	   FragmentManager fm = getFragmentManager();
+	   FragmentTransaction ft = fm.beginTransaction();
+	   ft.hide(fm.findFragmentById(R.id.status_list));
+	   ft.show(fm.findFragmentById(R.id.info_screen));
+	   ft.hide(fm.findFragmentById(R.id.device_list));
+	   
+	    ft.commit();
+   }
 
     @Override
     public void onStart() {
@@ -202,15 +233,7 @@ public class GilgaMeshActivity extends Activity {
         super.onPause();
 
     }
-   
 
-    
-    private final void setStatus(CharSequence subTitle) {
-        final ActionBar actionBar = getActionBar();
-        actionBar.setSubtitle(subTitle);
-    }
-
-    
 
     @Override
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -229,16 +252,8 @@ public class GilgaMeshActivity extends Activity {
 
                 mLocalAddress = GilgaService.mapToNickname(bluetoothAdapter.getAddress());
 
-            	if (bluetoothAdapter.getScanMode() ==
-            	          BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {        		
-            	
-                    setStatus(getString(R.string.broadcast_mode_public_) 
-                    		+ " @"	+ mLocalAddress);
-            	}
-            	else    
-            		setStatus(getString(R.string.listen_mode));
-            	
-           
+                resetTitle();
+                
                 Intent intent = new Intent(this, GilgaService.class);
                 intent.putExtra("listen", true);
                 startService(intent);
@@ -322,16 +337,23 @@ public class GilgaMeshActivity extends Activity {
     	{
     		public void run ()
     		{
-		    	if (bluetoothAdapter.getScanMode() ==
-		  	          BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {        		
-		  	
-		          setStatus(getString(R.string.broadcast_mode_public_) 
-		          		+ " @"	+ mLocalAddress);
-			  	}
-			  	else    
-			  		setStatus(getString(R.string.listen_mode));
+    			resetTitle();
     		}
     	},5000);
+    }
+    
+    private void resetTitle ()
+    {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+    	if (bluetoothAdapter.getScanMode() ==
+  	          BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {        		
+  	
+          setTitle(getString(R.string.app_name) 
+          		+ " @"	+ mLocalAddress);
+  	}
+  	else    
+  		setTitle(getString(R.string.app_name) + ' ' + getString(R.string.listen_mode));
     }
     
     private void toggleRepeater ()

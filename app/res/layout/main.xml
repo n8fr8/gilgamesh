@@ -14,19 +14,32 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <fragment
         android:id="@+id/status_list"
         android:name="info.guardianproject.gilga.StatusListFragment"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         tools:layout="@layout/status_list" />
 
+     <fragment
+        android:id="@+id/device_list"
+        android:name="info.guardianproject.gilga.DeviceListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:layout="@layout/device_list" />
+     
+       <fragment
+        android:id="@+id/info_screen"
+        android:name="info.guardianproject.gilga.InfoFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        tools:layout="@layout/info" />
 
-</LinearLayout>
+</RelativeLayout>

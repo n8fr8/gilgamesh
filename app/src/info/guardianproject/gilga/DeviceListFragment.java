@@ -16,22 +16,15 @@
 
 package info.guardianproject.gilga;
 
+import info.guardianproject.gilga.radio.BluetoothClassicController;
 import info.guardianproject.gilga.service.GilgaService;
-
-import java.util.Set;
-
-import android.app.Activity;
 import android.app.Fragment;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -39,6 +32,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * This Activity appears as a dialog. It lists any paired devices and
@@ -58,6 +52,8 @@ public class DeviceListFragment extends Fragment {
     private ArrayAdapter<String> mPairedDevicesArrayAdapter;
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
 
+    private Handler mHandler = new Handler(); //for posting delayed events
+
     @Override
     public View onCreateView(LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
@@ -68,13 +64,24 @@ public class DeviceListFragment extends Fragment {
         
         // Initialize the button to perform device discovery
         Button scanButton = (Button) rootView.findViewById(R.id.button_scan);
-        scanButton.setVisibility(View.GONE);
-        
+        scanButton.setOnClickListener(new OnClickListener()
+        {
+
+			@Override
+			public void onClick(View arg0) {
+				refreshDevices();
+				
+			}
+        	
+        });
+
         // Initialize array adapters. One for already paired devices and
         // one for newly discovered devices
         mPairedDevicesArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.device_name);
         mNewDevicesArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.device_name);
-
+        
+        refreshDevices ();
+        
         // Find and set up the ListView for paired devices
         ListView pairedListView = (ListView) rootView.findViewById(R.id.paired_devices);
         pairedListView.setAdapter(mPairedDevicesArrayAdapter);
@@ -84,7 +91,9 @@ public class DeviceListFragment extends Fragment {
         ListView newDevicesListView = (ListView) rootView.findViewById(R.id.new_devices);
         newDevicesListView.setAdapter(mNewDevicesArrayAdapter);
         newDevicesListView.setOnItemClickListener(mDeviceClickListener);
+    	rootView.findViewById(R.id.title_paired_devices).setVisibility(View.VISIBLE);
 
+              
         /*
         // If there are paired devices, add each one to the ArrayAdapter
         if (pairedDevices.size() > 0) {
@@ -100,8 +109,67 @@ public class DeviceListFragment extends Fragment {
 
         return rootView;
     }
+    
+    private void refreshDevices ()
+    {
+    	 
+    	mPairedDevicesArrayAdapter.clear();
+    	mNewDevicesArrayAdapter.clear();
+    	
+        for (BluetoothDevice device: GilgaService.mDeviceMap.values())
+        {
+        	if (device.getBondState() == BluetoothDevice.BOND_BONDED)
+        		mPairedDevicesArrayAdapter.add(
+        				'@' + GilgaService.mapToNickname(device.getAddress())
+        				+ "\n" + device.getAddress());
+        }
+        
+        for (BluetoothDevice device: GilgaService.mDeviceMap.values())
+        {
+        	if (device.getBondState() != BluetoothDevice.BOND_BONDED)
+        		mNewDevicesArrayAdapter.add('@' + GilgaService.mapToNickname(device.getAddress()) + "\n" + device.getAddress());
+        }
 
-    // The on-click listener for all devices in the ListViews
+    }
+    
+	@Override
+	public void onHiddenChanged(boolean hidden) {
+		// TODO Auto-generated method stub
+		super.onHiddenChanged(hidden);
+		
+		if (!hidden)
+			refreshDevices();
+	}
+	
+
+	private void togglePairing (BluetoothDevice device)
+	{
+		   
+    	if (device.getBondState() != BluetoothDevice.BOND_BONDED)
+    	{
+    		BluetoothClassicController.pairDevice(device);
+    		Toast.makeText(getActivity(), "add device to trusted list...", Toast.LENGTH_LONG).show();
+
+    	}
+    	else
+    	{
+    		BluetoothClassicController.unpairDevice(device);
+    		Toast.makeText(getActivity(), "removing device from trusted list...", Toast.LENGTH_LONG).show();
+
+    	}
+
+
+    	mHandler.postDelayed(new Runnable ()
+    	{
+    		public void run ()
+    		{
+    			refreshDevices();
+    		}
+    	}
+    	, 5000);
+	}
+
+	// The on-click listener for all devices in the ListViews
     private OnItemClickListener mDeviceClickListener = new OnItemClickListener() {
         public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
             // Cancel discovery because it's costly and we're about to connect
@@ -111,13 +179,9 @@ public class DeviceListFragment extends Fragment {
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
 
-            // Create the result Intent and include the MAC address
-            Intent intent = new Intent();
-            intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
-
-            // Set result and finish this Activity
-            //setResult(Activity.RESULT_OK, intent);
-            //finish();
+            BluetoothDevice device = GilgaService.mDeviceMap.get(address);
+        
+            togglePairing(device);
         }
     };
 
