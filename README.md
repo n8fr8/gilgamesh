@@ -1,7 +1,9 @@
-gilgamesh
+Pinwheel Messenger (formerly known as Gilga aka gilgamesh)
 =========
 
-Gilga Meshenger: Messaging in the Bluetooth Babylon!
+Pinwheel (formerly known as Gilgamesh) is an experimental app that is a proof-of-concept of the Wind nearby network concept (https://github.com/n8fr8/WindFarm). It utilizes bluetooth and wifi device names to enable "status casting", otherwise known as Twitter-over-Bluetooth.
+
+Learn more at: https://github.com/n8fr8/gilgamesh and http://github.com/n8fr8/WindFarm
 
 Some notes on the implementation, aka the glorious hack of Bluetooth Device Names. This application was original based on the Android SDK BluetoothChat sample. It used insecure (unpaired) and secure (paired) Bluetooth RFComm sockets to allow for short messages to be sent between devices. The primary modification that this project has made has been to add support for a "Broadcast" mode, that uses the Bluetooth device name, that is public visible during the Discovery process, as the message transport itself. 
 
@@ -18,7 +20,7 @@ Android app:
 
 ![alt](https://raw.githubusercontent.com/n8fr8/gilgamesh/master/screens/device-2014-10-06-165447.png) ![alt](https://raw.githubusercontent.com/n8fr8/gilgamesh/master/screens/device-2014-10-09-120044.png)
 
-Gilamesh also supports Linux:
+Pinwheel also supports Linux:
 https://github.com/n8fr8/gilgamesh/blob/master/docs/gilgamesh.sh
 
 The key innovations/hacks/revelations that led us to this point were:
