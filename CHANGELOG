@@ -1,4 +1,51 @@
 
+//3e9b326 0.0.12
+0a42944 updated app name to Pinwheel from "Gilga" Also added info about Wind project: https://github.com/n8fr8/WindFarm
+3f2dc01 make links clickable again
+cae6591 add support for share/send intents from other apps sets the status text field to the shared value but does not send auto
+7bda1c7 add generic Device model so we can track bluetooth and wifi devices
+3147960 update string translations and add some new ones
+8602d99 Merge branch 'RyDroid-fr'
+c1d6da4 Merge branch 'fr' of https://github.com/RyDroid/gilgamesh into RyDroid-fr
+
+//73b0e38 0.0.11
+de440c3 fix link clicking issue
+e7160f7 make sure adapters are init'd inside of activity (for link clicking!)
+93069d8 change the font back to light
+
+//4b1319a bump to 0.0.10
+357362e add info and devices tabs
+a160eeb add basic working "fav" feature with tabs
+9bab44d updates to service and models
+d81c913 update UI to use fragments
+a6faa52 add dropshadow! :)
+a888420 oh lord i hate markdown
+5f91f3b shorten subtitle string fixes #24
+14300e7 tryin to resize images again
+20965b4 trying to resize images
+713f889 updated info on linux
+337725b added simple script
+82b9c3b updating info
+c666075 add linux how to
+b394b9b A nearly complete french translation
+688a9b3 more layout updates with new "reached" vs "reaching..." indicators use color, icons and text to indicate which message is act
+
+//4e35962 update to 0.0.9
+48cf195 add visibility toggle. closes #18
+19ed4ee bug fix for duplicate Status instance on reshare
+
+//b6ca11d 0.0.8 reach count and updated UI
+b37f2ab success only if a new message (affects reach count)
+76f4cb8 layout and UI updates for messages/status
+0e9a9fc Merge pull request #16 from valerio-bozzolan/master
+ba47592 secondary text on status needs to be a lil bit darker
+9a26083 small layout/theme update
+975600d a bit of refactoring
+cb044b2 Addded localization support in Italian Language
+4f74149 updated with new screenshots
+33dd20d adding docs and diagrams
+2e4bb4e adding new screenshots
+
 // cfb2aed 0.0.7
 b277de6 turn IRCRepeater off for now until we build pref UI
 006b13d add in ability for repeater to repeat to IRC, if it can get internet
