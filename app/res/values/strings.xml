@@ -15,7 +15,7 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">Gilga</string>
+    <string name="app_name">Pinwheel</string>
 
     <!--  BluetoothChat -->
     <string name="send">Send</string>
@@ -78,7 +78,7 @@
     <string name="nearby">Nearby</string>
     <string name="info">Info</string>
     
-    <string name="about">This is an experimental application that utilizes bluetooth and wifi device names to enable "status casting", otherwise known as Twitter-over-Bluetooth.\n\nLearn more at: https://github.com/n8fr8/gilgamesh</string>
+    <string name="about">Pinwheel (formerly known as Gilgamesh) is an experimental app that is a proof-of-concept of the Wind nearby network concept (https://github.com/n8fr8/WindFarm). It utilizes bluetooth and wifi device names to enable "status casting", otherwise known as Twitter-over-Bluetooth.\n\nLearn more at: https://github.com/n8fr8/gilgamesh and http://github.com/n8fr8/WindFarm</string>
     
     <string name="add_device_to_trusted_list_">add device to trusted list...</string>
     

@@ -67,7 +67,7 @@
         android:id="@+id/body"
         android:layout_below="@id/infoline"
         android:layout_marginLeft="4dp"
-            android:textColor="#222222"
+            android:textColor="#000000"
 	    android:textAppearance="?android:attr/textAppearanceMedium"
 	    android:fontFamily="sans-serif-light"
 	    android:autoLink="all"

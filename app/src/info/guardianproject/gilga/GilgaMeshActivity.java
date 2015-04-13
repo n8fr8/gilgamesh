@@ -393,7 +393,7 @@ public class GilgaMeshActivity extends Activity {
           		+ " @"	+ mLocalAddress);
   	}
   	else    
-  		setTitle(getString(R.string.app_name) + ' ' + getString(R.string.listen_mode));
+  		setTitle(getString(R.string.app_name) + ": " + getString(R.string.listen_mode));
     }
     
     private void toggleRepeater ()

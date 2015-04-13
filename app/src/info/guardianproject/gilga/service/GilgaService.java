@@ -236,7 +236,7 @@ public class GilgaService extends Service {
         // Indicates this device's details have changed.
         filter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         
-        this.registerReceiver(mReceiver, filter);
+        registerReceiver(mReceiver, filter);
         
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");

@@ -151,7 +151,9 @@ public class WifiController {
 		   mLocalAddressHeader = localAddressHeader;//shares with BT address to avoid dup messages
 	   }
 	   
-	   
+	   /**
+	    * this is not reliable, so let's not do it anymore
+
 	   public void setWifiDeviceName (String newDeviceName)
 	    {
 	    	try
@@ -183,7 +185,7 @@ public class WifiController {
 	        	
 	        	Log.e(TAG,"error setting wifi name",e);
 	        }
-	    }
+	    }*/
 	   
 	   public void getNetworkInfo ()
 	   {
@@ -266,7 +268,7 @@ public class WifiController {
 	    
 	    public void updateWifiStatus(String status) {
 	    	
-	    	setWifiDeviceName(' ' + status);
+	    	//setWifiDeviceName(' ' + status);
 	    	
 	        //  Create a string map containing information about your service.
 	        Map record = new HashMap();
@@ -340,7 +342,7 @@ public class WifiController {
 	                	Log.d(TAG,"SD service available!");
 	                }
 	            };
-
+	            
 	            mWifiManager.setDnsSdResponseListeners(mWifiChannel, servListener, txtListener);
 	            
 	            mWifiManager.discoverServices(mWifiChannel, new ActionListener() {
