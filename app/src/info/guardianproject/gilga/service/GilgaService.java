@@ -748,7 +748,8 @@ public class GilgaService extends Service {
             	{
             		public void run ()
             		{
-                        mBluetoothAdapter.startDiscovery();
+            			if (mBluetoothAdapter != null)
+            				mBluetoothAdapter.startDiscovery();
             		}
             	}, BLUETOOTH_DISCOVERY_RETRY_TIMEOUT);
             }
